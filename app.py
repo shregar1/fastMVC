@@ -16,7 +16,6 @@ from loguru import logger
 
 from constants.default import Default
 from controllers.user import router as UserRouter
-from controllers.apis import router as APISRouter
 
 from middlewares.authetication import AuthenticationMiddleware
 from middlewares.rate_limit import (
@@ -122,8 +121,6 @@ logger.info("Initialised middleware stack")
 logger.info("Initialising routers")
 # USER ROUTER
 app.include_router(UserRouter)
-# APIS ROUTER
-app.include_router(APISRouter)
 logger.info("Initialised routers")
 
 

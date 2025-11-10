@@ -3,18 +3,18 @@ Startup utilities for CalCount: loads configuration, environment variables,
 and initializes core services (DB, Redis, LLM, logging).
 """
 import os
+from typing import Any
+from sqlalchemy.orm.session import Session
 import redis
 import sys
 
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
 from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from configurations.cache import CacheConfiguration, CacheConfigurationDTO
 from configurations.db import DBConfiguration, DBConfigurationDTO
-from configurations.usda import USDAConfiguration, USDAConfigurationDTO
 
 from constants.default import Default
 
@@ -38,7 +38,6 @@ load_dotenv()
 logger.info("Loading Configurations")
 cache_configuration: CacheConfigurationDTO = CacheConfiguration().get_config()
 db_configuration: DBConfigurationDTO = DBConfiguration().get_config()
-usda_configuration: USDAConfigurationDTO = USDAConfiguration().get_config()
 logger.info("Loaded Configurations")
 
 # Access environment variables
@@ -52,8 +51,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
         Default.ACCESS_TOKEN_EXPIRE_MINUTES,
     )
 )
-GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
-USDA_API_KEY: str = os.getenv("USDA_API_KEY")
 RATE_LIMIT_REQUESTS_PER_MINUTE: int = int(
     os.getenv(
         "RATE_LIMIT_REQUESTS_PER_MINUTE",
@@ -80,41 +77,45 @@ RATE_LIMIT_BURST_LIMIT: int = int(
 )
 logger.info("Loaded environment variables")
 
-logger.info("Initializing PostgreSQL database connection")
-engine = create_engine(
-    db_configuration.connection_string.format(
-        user_name=db_configuration.user_name,
-        password=db_configuration.password,
-        host=db_configuration.host,
-        port=db_configuration.port,
-        database=db_configuration.database,
+db_session: Session = None
+if (
+    db_configuration.user_name
+    and db_configuration.password
+    and db_configuration.host
+    and db_configuration.port
+    and db_configuration.database
+    and db_configuration.connection_string
+):
+    logger.info("Initializing PostgreSQL database connection")
+    engine = create_engine(
+        db_configuration.connection_string.format(
+            user_name=db_configuration.user_name,
+            password=db_configuration.password,
+            host=db_configuration.host,
+            port=db_configuration.port,
+            database=db_configuration.database,
+        )
     )
-)
-Session = sessionmaker(bind=engine)
-db_session = Session()
-logger.info("Initialized PostgreSQL database connection")
+    Session = sessionmaker[Session](bind=engine)
+    db_session: Session = Session()
+    logger.info("Initialized PostgreSQL database connection")
 
-logger.info("Initializing Redis database connection")
-redis_session = redis.Redis(
-    host=cache_configuration.host,
-    port=cache_configuration.port,
-    password=cache_configuration.password,
-)
-if not redis_session:
-    logger.error("No Redis session available")
-    raise RuntimeError("No Redis session available")
-logger.info("Initialized Redis database connection")
-
-logger.info("Initializing LLM (Google Gemini) if API key is present")
-if GOOGLE_API_KEY:
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        google_api_key=GOOGLE_API_KEY,
+redis_session: redis.Redis = None
+if (
+    cache_configuration.host
+    and cache_configuration.port
+    and cache_configuration.password
+):
+    logger.info("Initializing Redis database connection")
+    redis_session = redis.Redis(
+        host=cache_configuration.host,
+        port=cache_configuration.port,
+        password=cache_configuration.password,
     )
-    logger.info("Initialized Google Gemini LLM")
-else:
-    llm = None
-    logger.info("No Google API key found; LLM not initialized")
+    if not redis_session:
+        logger.error("No Redis session available")
+        raise RuntimeError("No Redis session available")
+    logger.info("Initialized Redis database connection")
 
 unprotected_routes: set = {
     "/health",
@@ -123,7 +124,8 @@ unprotected_routes: set = {
     "/docs",
     "/redoc",
 }
-callback_routes: set = set()
+callback_routes: set = set[Any]()
 
-db_session.commit()
-logger.info("Database session committed and startup complete")
+if db_session:  
+    db_session.commit()
+    logger.info("Database session committed and startup complete")
