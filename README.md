@@ -730,7 +730,7 @@ We love contributions! Here's how to get started:
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/pyfastmvc.git
+git clone https://github.com/shregar1/fastMVC.git
 cd pyfastmvc
 
 # Create virtual environment
@@ -762,8 +762,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 **⭐ Star us on GitHub if this helped you!**
 
-[Report Bug](https://github.com/pyfastmvc/pyfastmvc/issues) •
-[Request Feature](https://github.com/pyfastmvc/pyfastmvc/issues) •
-[Discussions](https://github.com/pyfastmvc/pyfastmvc/discussions)
+[Report Bug](https://github.com/shregar1/fastMVC/issues) •
+[Request Feature](https://github.com/shregar1/fastMVC/issues) •
+[Discussions](https://github.com/shregar1/fastMVC/discussions)
 
 </div>

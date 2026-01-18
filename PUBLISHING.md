@@ -135,7 +135,7 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 twine upload dist/*
 
 # Verify installation
-pip install fast-mvc
+pip install pyfastmvc
 fastmvc version
 ```
 

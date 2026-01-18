@@ -104,11 +104,11 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/fastapi-mvc-framework/fastapi-mvc-framework"
+Homepage = "https://github.com/shregar1/fastMVC"
 Documentation = "https://fastapi-mvc.dev/docs"
-Repository = "https://github.com/fastapi-mvc-framework/fastapi-mvc-framework"
-Issues = "https://github.com/fastapi-mvc-framework/fastapi-mvc-framework/issues"
-Changelog = "https://github.com/fastapi-mvc-framework/fastapi-mvc-framework/blob/main/CHANGELOG.md"
+Repository = "https://github.com/shregar1/fastMVC"
+Issues = "https://github.com/shregar1/fastMVC/issues"
+Changelog = "https://github.com/shregar1/fastMVC/blob/main/CHANGELOG.md"
 
 [project.scripts]
 fastmvc = "fastmvc_cli.cli:main"

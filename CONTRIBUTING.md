@@ -30,13 +30,13 @@ By participating in this project, you agree to maintain a respectful and inclusi
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/fastmvc.git
+   git clone https://github.com/shregar1/fastMVC.git
    cd fastmvc
    ```
 
 3. Add the upstream remote:
    ```bash
-   git remote add upstream https://github.com/fast-mvc/fastmvc.git
+   git remote add upstream https://github.com/shregar1/fastMVC.git
    ```
 
 ## Development Setup

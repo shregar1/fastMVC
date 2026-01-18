@@ -686,7 +686,7 @@ docker-compose down
 
 ## 📄 License
 
-MIT License - Built with ❤️ using [FastMVC](https://pypi.org/project/pyfastmvc/)
+MIT License - Built with ❤️ using [FastMVC](https://github.com/shregar1/fastMVC)
 """
         readme_path = self.project_path / "README.md"
         readme_path.write_text(readme_content)

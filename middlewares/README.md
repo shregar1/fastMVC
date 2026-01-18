@@ -278,5 +278,5 @@ middlewares/
 ## 🔗 Resources
 
 - [fastmvc-middleware on PyPI](https://pypi.org/project/fastmvc-middleware/)
-- [FastMiddleware Documentation](https://github.com/hyyre/fastmvc-middleware)
+- [FastMiddleware Documentation](https://github.com/shregar1/fastmvc-middleware)
 - [FastAPI Middleware Guide](https://fastapi.tiangolo.com/tutorial/middleware/)
