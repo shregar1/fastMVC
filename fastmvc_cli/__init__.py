@@ -15,7 +15,7 @@ Example:
     $ python -m uvicorn app:app --reload
 """
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 __author__ = "FastMVC Team"
 __package_name__ = "pyfastmvc"
 

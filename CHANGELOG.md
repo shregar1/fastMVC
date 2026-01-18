@@ -12,6 +12,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WebSocket support
 - OpenTelemetry tracing integration
 
+## [1.1.0] - 2026-01-18
+
+### Added
+- **FastMiddleware Integration** - Integrated [fastmvc-middleware](https://pypi.org/project/fastmvc-middleware/) package with 90+ production-ready middleware components
+  - SecurityHeadersMiddleware with enhanced configuration
+  - RateLimitMiddleware with sliding window algorithm
+  - RequestContextMiddleware for request tracking
+  - TimingMiddleware for response time headers
+  - LoggingMiddleware for structured request/response logging
+  - CORSMiddleware and TrustedHostMiddleware
+- Compatibility layer in AuthenticationMiddleware to work with FastMiddleware's RequestContextMiddleware
+- Enhanced README with middleware documentation and visual diagrams
+
+### Changed
+- Updated middleware stack to use FastMiddleware package components
+- Improved request URN handling to support both local and FastMiddleware request IDs
+
+### Dependencies
+- Added `fastmvc-middleware>=0.5.0` as core dependency
+
 ## [1.0.0] - 2026-01-18
 
 ### Added
@@ -75,6 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.1.0 | 2026-01-18 | FastMiddleware integration with 90+ middleware components |
 | 1.0.0 | 2026-01-18 | Major release with CLI, entity generator, migrations |
 | 0.1.0 | 2025-01-01 | Initial release |
 
