@@ -494,94 +494,165 @@ logs/
     
     def _create_readme(self):
         """Create the project README.md file."""
-        readme_content = f"""# {self.project_name.replace('_', ' ').title()}
+        project_title = self.project_name.replace('_', ' ').title()
+        readme_content = f"""<div align="center">
 
-A production-grade FastAPI application built with the FastMVC framework.
+# 🚀 {project_title}
 
-## 🚀 Quick Start
+### Production-Ready API built with FastMVC
 
-### Prerequisites
+[![Python](https://img.shields.io/badge/Python-3.10+-3776ab.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-- Python 3.10+
-- Docker & Docker Compose (for PostgreSQL and Redis)
+</div>
 
-### Installation
+---
 
-1. **Clone the repository:**
+## ⚡ Quick Start
+
+### 1️⃣ Setup Environment
+
 ```bash
-git clone <repository-url>
-cd {self.project_name}
-```
-
-2. **Create virtual environment:**
-```bash
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\\Scripts\\activate
-```
+source venv/bin/activate  # Windows: venv\\Scripts\\activate
 
-3. **Install dependencies:**
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-4. **Configure environment:**
-```bash
+# Configure environment
 cp .env.example .env
-# Edit .env with your configuration
 ```
 
-5. **Start infrastructure:**
+### 2️⃣ Start Infrastructure
+
 ```bash
+# Start PostgreSQL + Redis
 docker-compose up -d
+
+# Run database migrations
+fastmvc migrate upgrade
 ```
 
-6. **Run the application:**
+### 3️⃣ Run the Server
+
 ```bash
 python -m uvicorn app:app --reload
 ```
 
-7. **Access the API:**
-- API: http://localhost:8000
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+### 4️⃣ Done! 🎉
+
+- **API:** http://localhost:8000
+- **Docs:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         HTTP Request                            │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  🛡️ MIDDLEWARE STACK (FastMiddleware - 90+ components)         │
+│  RequestContext → Timing → RateLimit → Auth → Security         │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  🎮 CONTROLLER → 🔧 SERVICE → 🗄️ REPOSITORY → 💾 DATABASE       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## 📁 Project Structure
 
 ```
 {self.project_name}/
-├── abstractions/       # Base interfaces and contracts
-├── config/             # JSON configuration files
-├── configurations/     # Configuration loaders
-├── constants/          # Application constants
-├── controllers/        # Request handlers (routes)
-├── dependencies/       # FastAPI dependency injection
-├── dtos/               # Data Transfer Objects
-├── errors/             # Custom exception classes
-├── middlewares/        # Request/Response middleware
-├── models/             # SQLAlchemy database models
-├── repositories/       # Data access layer
-├── services/           # Business logic layer
-├── tests/              # Test suite
-├── utilities/          # Helper functions
-├── app.py              # FastAPI application entry point
-├── start_utils.py      # Application startup utilities
-├── docker-compose.yml  # Docker services configuration
-├── Dockerfile          # Container build instructions
-└── requirements.txt    # Python dependencies
+├── 🎯 app.py                 # FastAPI entry point
+├── ⚙️ start_utils.py         # Startup configuration
+│
+├── 📋 abstractions/          # Base interfaces & contracts
+├── 🎮 controllers/           # HTTP route handlers
+├── 🔧 services/              # Business logic layer
+├── 🗄️ repositories/          # Data access layer
+├── 📊 models/                # SQLAlchemy ORM models
+├── 📨 dtos/                  # Data Transfer Objects
+├── 🛡️ middlewares/           # Request processing
+├── 🔄 migrations/            # Alembic migrations
+├── 🧪 tests/                 # Test suite
+│
+└── 🐳 docker-compose.yml     # PostgreSQL + Redis
 ```
 
-## 🔐 Authentication
+---
 
-This application uses JWT (JSON Web Tokens) for authentication.
+## 🔌 API Endpoints
 
-### Endpoints
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/health` | Health check | ❌ |
+| POST | `/user/register` | User registration | ❌ |
+| POST | `/user/login` | User authentication | ❌ |
+| POST | `/user/logout` | Session termination | ✅ |
+| GET | `/docs` | Swagger UI | ❌ |
 
-| Method | Endpoint         | Description           | Auth Required |
-|--------|------------------|-----------------------|---------------|
-| POST   | `/user/login`    | User login            | No            |
-| POST   | `/user/register` | User registration     | No            |
-| POST   | `/user/logout`   | User logout           | Yes           |
-| GET    | `/health`        | Health check          | No            |
+---
+
+## 🛠️ CLI Commands
+
+### Add New Entity
+
+```bash
+# Generate complete CRUD for an entity
+fastmvc add entity Product
+
+# Creates: model, repository, service, controller, DTOs, tests
+```
+
+### Database Migrations
+
+```bash
+fastmvc migrate generate "add product table"  # Create migration
+fastmvc migrate upgrade                        # Apply migrations
+fastmvc migrate downgrade                      # Rollback
+fastmvc migrate status                         # Show status
+```
+
+---
+
+## 🛡️ Middleware Stack
+
+This project uses [**fastmvc-middleware**](https://pypi.org/project/fastmvc-middleware/) with 90+ production-ready components:
+
+```python
+from FastMiddleware import (
+    SecurityHeadersMiddleware,    # CSP, HSTS, X-Frame-Options
+    RateLimitMiddleware,          # Sliding window rate limiting
+    RequestContextMiddleware,     # Request tracking & URN
+    TimingMiddleware,             # Response time headers
+    LoggingMiddleware,            # Structured request logging
+)
+```
+
+---
+
+## 🔐 Security Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔑 JWT Authentication | Secure token-based auth |
+| 🔒 Password Hashing | Bcrypt with salt |
+| 🚦 Rate Limiting | Sliding window (60/min, 1000/hr) |
+| 🛡️ Security Headers | CSP, HSTS, X-Frame-Options |
+| 📍 Request Tracing | Unique URN per request |
+
+---
 
 ## 🧪 Testing
 
@@ -589,50 +660,33 @@ This application uses JWT (JSON Web Tokens) for authentication.
 # Run all tests
 pytest
 
-# Run with coverage
+# With coverage report
 pytest --cov=. --cov-report=html
 
-# Run specific test file
-pytest tests/unit/services/test_user_services.py -v
+# Run specific tests
+pytest tests/unit/services/ -v
 ```
+
+---
 
 ## 🐳 Docker
 
 ```bash
-# Build and run all services
-docker-compose up -d --build
+# Start all services
+docker-compose up -d
 
 # View logs
 docker-compose logs -f
 
-# Stop services
+# Stop everything
 docker-compose down
 ```
 
-## 📝 API Documentation
-
-Once the server is running, access the interactive API documentation:
-
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-
-## 🛡️ Security Features
-
-- JWT Authentication with secure token handling
-- Rate limiting (sliding window algorithm)
-- Security headers (HSTS, CSP, X-Frame-Options, etc.)
-- Input validation and sanitization
-- SQL injection protection
-- XSS prevention
-- Path traversal protection
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
----
-
-Built with ❤️ using [FastMVC](https://github.com/fastmvc/fastmvc)
+MIT License - Built with ❤️ using [FastMVC](https://pypi.org/project/pyfastmvc/)
 """
         readme_path = self.project_path / "README.md"
         readme_path.write_text(readme_content)

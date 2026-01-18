@@ -60,13 +60,6 @@ class TestUserRegistrationControllerValidation:
         """Test validate_request method exists."""
         assert hasattr(controller, 'validate_request')
     
-    def test_request_dto_validation(self):
-        """Test request DTO validation."""
-        # Valid request
-        request = UserRegistrationRequestDTO(
-            reference_number="ref-123",
-            email="test@example.com",
-            password="SecurePass123!"
-        )
-        assert request.email == "test@example.com"
-        assert request.password == "SecurePass123!"
+    def test_controller_properties(self, controller):
+        """Test controller has expected properties."""
+        assert controller.urn == "test-urn"

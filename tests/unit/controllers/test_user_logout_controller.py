@@ -32,23 +32,9 @@ class TestUserLogoutControllerPost:
         """Create controller instance."""
         return UserLogoutController(urn="test-urn")
     
-    @pytest.fixture
-    def mock_request(self):
-        """Create mock request DTO."""
-        return UserLogoutRequestDTO(reference_number="ref-123")
-    
-    @pytest.mark.asyncio
-    async def test_post_calls_service(self, controller):
-        """Test post method calls service."""
-        mock_service = MagicMock()
-        mock_service.run = AsyncMock(return_value={"success": True})
-        
-        controller.logout_service = mock_service
-        controller.user_repository = MagicMock()
-        
-        request = UserLogoutRequestDTO(reference_number="ref-123")
-        
-        # The post method should be callable
+    def test_post_method_exists(self, controller):
+        """Test post method exists."""
+        assert hasattr(controller, 'post')
         assert callable(controller.post)
 
 

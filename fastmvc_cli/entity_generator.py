@@ -790,6 +790,12 @@ from utilities.dictionary import DictionaryUtility
 
 from loguru import logger
 
+try:
+    from FastMiddleware.request_context import get_request_id
+except ImportError:
+    def get_request_id():
+        return None
+
 logger.debug("Registering {self.entity_name} routes.")
 
 router = APIRouter(prefix="/{self.entity_snake}", tags=["{self.entity_name}"])
@@ -838,7 +844,7 @@ async def create_{self.entity_snake}(
         JSONResponse with created {self.entity_lower}.
     """
     try:
-        urn = getattr(request.state, "urn", "unknown")
+        urn = get_request_id() or getattr(request.state, "urn", None) or "unknown"
         user_id = getattr(request.state, "user_id", 1)
         
         service = service_factory(
@@ -859,7 +865,7 @@ async def create_{self.entity_snake}(
         return JSONResponse(
             status_code=e.http_status_code,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": e.response_message,
                 "responseKey": e.response_key,
@@ -871,7 +877,7 @@ async def create_{self.entity_snake}(
         return JSONResponse(
             status_code=500,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": "Internal server error.",
                 "responseKey": "error_internal",
@@ -900,7 +906,7 @@ async def list_{self.entity_snake}s(
         JSONResponse with list of {self.entity_lower}s.
     """
     try:
-        urn = getattr(request.state, "urn", "unknown")
+        urn = get_request_id() or getattr(request.state, "urn", None) or "unknown"
         user_id = getattr(request.state, "user_id", 1)
         
         service = service_factory(
@@ -922,7 +928,7 @@ async def list_{self.entity_snake}s(
         return JSONResponse(
             status_code=500,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": "Internal server error.",
                 "responseKey": "error_internal",
@@ -949,7 +955,7 @@ async def get_{self.entity_snake}(
         JSONResponse with {self.entity_lower} data.
     """
     try:
-        urn = getattr(request.state, "urn", "unknown")
+        urn = get_request_id() or getattr(request.state, "urn", None) or "unknown"
         user_id = getattr(request.state, "user_id", 1)
         
         service = service_factory(
@@ -970,7 +976,7 @@ async def get_{self.entity_snake}(
         return JSONResponse(
             status_code=e.http_status_code,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": e.response_message,
                 "responseKey": e.response_key,
@@ -982,7 +988,7 @@ async def get_{self.entity_snake}(
         return JSONResponse(
             status_code=500,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": "Internal server error.",
                 "responseKey": "error_internal",
@@ -1011,7 +1017,7 @@ async def update_{self.entity_snake}(
         JSONResponse with updated {self.entity_lower}.
     """
     try:
-        urn = getattr(request.state, "urn", "unknown")
+        urn = get_request_id() or getattr(request.state, "urn", None) or "unknown"
         user_id = getattr(request.state, "user_id", 1)
         
         service = service_factory(
@@ -1032,7 +1038,7 @@ async def update_{self.entity_snake}(
         return JSONResponse(
             status_code=e.http_status_code,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": e.response_message,
                 "responseKey": e.response_key,
@@ -1044,7 +1050,7 @@ async def update_{self.entity_snake}(
         return JSONResponse(
             status_code=500,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": "Internal server error.",
                 "responseKey": "error_internal",
@@ -1071,7 +1077,7 @@ async def delete_{self.entity_snake}(
         JSONResponse confirming deletion.
     """
     try:
-        urn = getattr(request.state, "urn", "unknown")
+        urn = get_request_id() or getattr(request.state, "urn", None) or "unknown"
         user_id = getattr(request.state, "user_id", 1)
         
         service = service_factory(
@@ -1092,7 +1098,7 @@ async def delete_{self.entity_snake}(
         return JSONResponse(
             status_code=e.http_status_code,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": e.response_message,
                 "responseKey": e.response_key,
@@ -1104,7 +1110,7 @@ async def delete_{self.entity_snake}(
         return JSONResponse(
             status_code=500,
             content={{
-                "transactionUrn": getattr(request.state, "urn", "unknown"),
+                "transactionUrn": get_request_id() or getattr(request.state, "urn", None) or "unknown",
                 "status": APIStatus.FAILED,
                 "responseMessage": "Internal server error.",
                 "responseKey": "error_internal",

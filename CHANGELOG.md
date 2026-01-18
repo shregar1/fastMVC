@@ -12,6 +12,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - WebSocket support
 - OpenTelemetry tracing integration
 
+## [1.2.0] - 2026-01-18
+
+### Added
+- **Enhanced README for Generated Projects** - Modern, visually appealing README with:
+  - Architecture diagrams
+  - Quick start guide
+  - CLI command reference
+  - Middleware stack documentation
+  - Security features table
+- **Improved CLI Output** - Better formatted help messages with emojis and visual separators
+- **FastMiddleware Support in Generated Entities** - Controllers now use `get_request_id()` from FastMiddleware with fallback
+
+### Changed
+- Updated `fastmvc info` command with visual formatting and middleware documentation
+- Generated controllers now import and use `FastMiddleware.request_context.get_request_id()` for request tracking
+- Improved entity generator templates with better FastMiddleware integration
+
+### Fixed
+- Request URN handling in generated controllers now supports both FastMiddleware and legacy request.state.urn
+
 ## [1.1.0] - 2026-01-18
 
 ### Added
@@ -95,6 +115,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.2.0 | 2026-01-18 | Enhanced CLI, improved generators, better FastMiddleware integration |
 | 1.1.0 | 2026-01-18 | FastMiddleware integration with 90+ middleware components |
 | 1.0.0 | 2026-01-18 | Major release with CLI, entity generator, migrations |
 | 0.1.0 | 2025-01-01 | Initial release |

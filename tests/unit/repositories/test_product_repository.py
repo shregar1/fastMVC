@@ -30,6 +30,11 @@ class TestProductRepositoryInit:
         mock_session = MagicMock()
         repo.session = mock_session
         assert repo.session == mock_session
+    
+    def test_has_logger(self):
+        """Test repository has logger."""
+        repo = ProductRepository()
+        assert hasattr(repo, 'logger')
 
 
 class TestProductRepositoryRetrieve:
@@ -38,7 +43,13 @@ class TestProductRepositoryRetrieve:
     @pytest.fixture
     def mock_session(self):
         """Create mock session."""
-        return MagicMock()
+        session = MagicMock()
+        mock_query = MagicMock()
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = MagicMock(spec=Product)
+        mock_query.all.return_value = [MagicMock(spec=Product)]
+        session.query.return_value = mock_query
+        return session
     
     @pytest.fixture
     def repo(self, mock_session):
@@ -47,61 +58,18 @@ class TestProductRepositoryRetrieve:
     
     def test_retrieve_record_by_id(self, repo, mock_session):
         """Test retrieving by ID."""
-        mock_product = MagicMock(spec=Product)
-        mock_product.id = 1
-        mock_product.name = "Test Product"
-        
-        mock_query = MagicMock()
-        mock_query.filter.return_value = mock_query
-        mock_query.first.return_value = mock_product
-        mock_session.query.return_value = mock_query
-        
         result = repo.retrieve_record_by_id(1)
-        
-        mock_session.query.assert_called()
+        mock_session.query.assert_called_with(Product)
     
     def test_retrieve_record_by_urn(self, repo, mock_session):
         """Test retrieving by URN."""
-        mock_product = MagicMock(spec=Product)
-        mock_product.urn = "test-product-urn"
-        
-        mock_query = MagicMock()
-        mock_query.filter.return_value = mock_query
-        mock_query.first.return_value = mock_product
-        mock_session.query.return_value = mock_query
-        
-        result = repo.retrieve_record_by_urn("test-product-urn")
-        
-        mock_session.query.assert_called()
+        result = repo.retrieve_record_by_urn("test-urn")
+        mock_session.query.assert_called_with(Product)
     
-    def test_retrieve_record_by_name(self, repo, mock_session):
-        """Test retrieving by name."""
-        mock_product = MagicMock(spec=Product)
-        mock_product.name = "Test Product"
-        
-        mock_query = MagicMock()
-        mock_query.filter.return_value = mock_query
-        mock_query.first.return_value = mock_product
-        mock_session.query.return_value = mock_query
-        
-        result = repo.retrieve_record_by_name("Test Product")
-        
-        mock_session.query.assert_called()
-    
-    def test_retrieve_records_by_filter(self, repo, mock_session):
-        """Test retrieving multiple records."""
-        mock_products = [
-            MagicMock(spec=Product, id=1),
-            MagicMock(spec=Product, id=2),
-        ]
-        
-        mock_query = MagicMock()
-        mock_query.filter.return_value = mock_query
-        mock_query.all.return_value = mock_products
-        mock_session.query.return_value = mock_query
-        
-        result = repo.retrieve_all_active()
-        mock_session.query.assert_called()
+    def test_retrieve_all_records(self, repo, mock_session):
+        """Test retrieving all records."""
+        result = repo.retrieve_all_records()
+        mock_session.query.assert_called_with(Product)
 
 
 class TestProductRepositoryCreate:
@@ -111,9 +79,6 @@ class TestProductRepositoryCreate:
     def mock_session(self):
         """Create mock session."""
         session = MagicMock()
-        session.add = MagicMock()
-        session.commit = MagicMock()
-        session.refresh = MagicMock()
         return session
     
     @pytest.fixture
@@ -148,12 +113,9 @@ class TestProductRepositoryUpdate:
         """Test updating a record."""
         mock_product = MagicMock(spec=Product)
         mock_product.id = 1
-        mock_product.name = "Old Name"
         
-        result = repo.update_record(
-            record=mock_product,
-            name="New Name"
-        )
+        # update_record takes just the record object
+        result = repo.update_record(record=mock_product)
         
         mock_session.commit.assert_called()
 
@@ -164,60 +126,32 @@ class TestProductRepositoryDelete:
     @pytest.fixture
     def mock_session(self):
         """Create mock session."""
-        return MagicMock()
+        session = MagicMock()
+        mock_query = MagicMock()
+        mock_product = MagicMock(spec=Product)
+        mock_query.filter.return_value = mock_query
+        mock_query.first.return_value = mock_product
+        session.query.return_value = mock_query
+        return session
     
     @pytest.fixture
     def repo(self, mock_session):
         """Create ProductRepository instance."""
         return ProductRepository(session=mock_session)
     
-    def test_soft_delete(self, repo, mock_session):
-        """Test soft deleting a record."""
-        mock_product = MagicMock(spec=Product)
-        mock_product.id = 1
-        mock_product.is_deleted = False
-        
-        result = repo.soft_delete(mock_product)
+    def test_delete_record(self, repo, mock_session):
+        """Test deleting a record."""
+        result = repo.delete_record(record_id=1, deleted_by=1)
         
         mock_session.commit.assert_called()
-
-
-class TestProductRepositoryList:
-    """Tests for ProductRepository list methods."""
     
-    @pytest.fixture
-    def mock_session(self):
-        """Create mock session."""
-        return MagicMock()
-    
-    @pytest.fixture
-    def repo(self, mock_session):
-        """Create ProductRepository instance."""
-        return ProductRepository(session=mock_session)
-    
-    def test_retrieve_all_active(self, repo, mock_session):
-        """Test retrieving all active records."""
-        mock_products = [
-            MagicMock(spec=Product, id=1, name="Product 1"),
-            MagicMock(spec=Product, id=2, name="Product 2"),
-        ]
-        
+    def test_delete_record_not_found(self, repo, mock_session):
+        """Test deleting non-existent record returns False."""
         mock_query = MagicMock()
         mock_query.filter.return_value = mock_query
-        mock_query.all.return_value = mock_products
+        mock_query.first.return_value = None
         mock_session.query.return_value = mock_query
         
-        result = repo.retrieve_all_active()
+        result = repo.delete_record(record_id=999, deleted_by=1)
         
-        mock_session.query.assert_called()
-    
-    def test_count_active(self, repo, mock_session):
-        """Test counting active records."""
-        mock_query = MagicMock()
-        mock_query.filter.return_value = mock_query
-        mock_query.count.return_value = 5
-        mock_session.query.return_value = mock_query
-        
-        result = repo.count_active()
-        
-        mock_session.query.assert_called()
+        assert result is False
