@@ -2,13 +2,15 @@
 Tests for request DTOs.
 """
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from pydantic import ValidationError
+
 from dtos.requests.abstraction import IRequestDTO
 from dtos.requests.user.login import UserLoginRequestDTO
-from dtos.requests.user.registration import UserRegistrationRequestDTO
 from dtos.requests.user.logout import UserLogoutRequestDTO
+from dtos.requests.user.registration import UserRegistrationRequestDTO
 
 
 class TestIRequestDTO:

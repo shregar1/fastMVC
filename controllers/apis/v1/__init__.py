@@ -14,6 +14,5 @@ Usage:
 
 from fastapi import APIRouter
 
-
 router = APIRouter(prefix="/v1")
 """Version 1 API router with /v1 prefix."""

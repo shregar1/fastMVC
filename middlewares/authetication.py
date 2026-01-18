@@ -5,19 +5,16 @@ Validates JWT tokens and enforces authentication on protected routes.
 Compatible with FastMiddleware's RequestContextMiddleware.
 """
 
+from http import HTTPMethod, HTTPStatus
+
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from http import HTTPStatus, HTTPMethod
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from constants.api_status import APIStatus
-
 from dtos.responses.base import BaseResponseDTO
-
 from repositories.user import UserRepository
-
-from start_utils import db_session, logger, unprotected_routes, callback_routes
-
+from start_utils import callback_routes, db_session, logger, unprotected_routes
 from utilities.jwt import JWTUtility
 
 # Import FastMiddleware's request context helper
@@ -26,43 +23,44 @@ try:
     HAS_FAST_MIDDLEWARE = True
 except ImportError:
     HAS_FAST_MIDDLEWARE = False
-    get_request_id = lambda: None
+    def get_request_id():
+        return None
 
 
 def _get_request_urn(request: Request) -> str:
     """
     Get request URN from request state.
-    
+
     Compatible with both local RequestContextMiddleware (sets .urn)
     and FastMiddleware's RequestContextMiddleware (sets .request_id).
-    
+
     Args:
         request: The FastAPI request object.
-        
+
     Returns:
         Request URN/ID string, or 'unknown' if not available.
     """
     # Try local middleware's urn first
     if hasattr(request.state, 'urn'):
         return request.state.urn
-    
+
     # Try FastMiddleware's request_id
     if hasattr(request.state, 'request_id'):
         return request.state.request_id
-    
+
     # Try context variable from FastMiddleware
     if HAS_FAST_MIDDLEWARE:
         request_id = get_request_id()
         if request_id:
             return request_id
-    
+
     return "unknown"
 
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
     """
     JWT Authentication Middleware.
-    
+
     Validates JWT tokens and enforces authentication on protected routes.
     Skips authentication for OPTIONS requests and unprotected routes.
     """
@@ -70,11 +68,11 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         """
         Process authentication for each request.
-        
+
         Args:
             request: The incoming FastAPI request.
             call_next: The next middleware/handler in the chain.
-            
+
         Returns:
             Response from the handler or 401 Unauthorized.
         """

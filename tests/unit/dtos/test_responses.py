@@ -2,9 +2,8 @@
 Tests for response DTOs.
 """
 
-import pytest
-from dtos.responses.base import BaseResponseDTO
 from constants.api_status import APIStatus
+from dtos.responses.base import BaseResponseDTO
 
 
 class TestBaseResponseDTO:

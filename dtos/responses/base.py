@@ -18,8 +18,8 @@ Usage:
     ... )
 """
 
+
 from pydantic import BaseModel
-from typing import List, Dict, Union, Optional
 
 
 class BaseResponseDTO(BaseModel):
@@ -95,8 +95,8 @@ class BaseResponseDTO(BaseModel):
     responseKey: str
     """Machine-readable key for programmatic handling and i18n."""
 
-    data: Optional[Union[List, Dict]] = None
+    data: list | dict | None = None
     """Main response payload (success data or empty dict on error)."""
 
-    errors: Optional[Union[List, Dict]] = None
+    errors: list | dict | None = None
     """Error details when status is FAILED."""

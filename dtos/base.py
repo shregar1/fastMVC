@@ -15,11 +15,12 @@ Usage:
 """
 
 from datetime import datetime
-from pydantic import BaseModel, validator
-from typing import Any, Dict
+from typing import Any
 
-from utilities.validation import ValidationUtility, SecurityValidators
+from pydantic import BaseModel, validator
+
 from start_utils import logger
+from utilities.validation import SecurityValidators, ValidationUtility
 
 
 class EnhancedBaseModel(BaseModel):
@@ -99,7 +100,7 @@ class EnhancedBaseModel(BaseModel):
             return ValidationUtility.sanitize_string(v)
         return v
 
-    def validate_security(self) -> Dict[str, Any]:
+    def validate_security(self) -> dict[str, Any]:
         """
         Perform comprehensive security validation on all string fields.
 

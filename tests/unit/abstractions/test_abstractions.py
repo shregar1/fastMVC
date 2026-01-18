@@ -3,6 +3,7 @@ Tests for abstraction base classes.
 """
 
 import pytest
+
 from abstractions.error import IError
 from abstractions.utility import IUtility
 

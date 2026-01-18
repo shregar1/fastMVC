@@ -17,8 +17,8 @@ Request Body:
 
 from pydantic import EmailStr, field_validator
 
-from dtos.requests.abstraction import IRequestDTO
 from dtos.base import EnhancedBaseModel
+from dtos.requests.abstraction import IRequestDTO
 from utilities.validation import ValidationUtility
 
 

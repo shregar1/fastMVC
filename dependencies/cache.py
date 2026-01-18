@@ -14,7 +14,7 @@ Usage:
 
 from redis import Redis
 
-from start_utils import redis_session, logger
+from start_utils import logger, redis_session
 
 
 class CacheDependency:

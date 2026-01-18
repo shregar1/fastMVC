@@ -22,13 +22,14 @@ Usage:
 """
 
 from datetime import datetime
+
 from sqlalchemy import (
-    Column,
     BigInteger,
-    String,
-    DateTime,
     Boolean,
+    Column,
+    DateTime,
     Index,
+    String,
 )
 
 from constants.db.table import Table

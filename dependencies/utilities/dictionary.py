@@ -16,7 +16,7 @@ Usage:
     ...     result = util.convert_dict_keys_to_camel_case(data)
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 from start_utils import logger
 from utilities.dictionary import DictionaryUtility

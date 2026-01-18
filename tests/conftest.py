@@ -7,9 +7,10 @@ in the FastMVC test suite.
 
 import os
 import sys
+from datetime import datetime
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-from datetime import datetime, timedelta
 
 # Ensure the project root is in the path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

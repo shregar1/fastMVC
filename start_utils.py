@@ -31,20 +31,19 @@ Configuration Files:
 """
 
 import os
-from typing import Any
-from sqlalchemy.orm.session import Session
-import redis
 import sys
+from typing import Any
 
+import redis
 from dotenv import load_dotenv
 from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
 
 from configurations.cache import CacheConfiguration, CacheConfigurationDTO
 from configurations.db import DBConfiguration, DBConfigurationDTO
 from constants.default import Default
-
 
 # =============================================================================
 # LOGGER CONFIGURATION

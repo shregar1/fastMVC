@@ -225,6 +225,18 @@ skip = [".venv", "venv", "build", "dist", "migrations"]
 [tool.ruff]
 line-length = 88
 target-version = "py310"
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "migrations",
+    "htmlcov",
+    "__pycache__",
+]
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -237,16 +249,17 @@ select = [
 ignore = [
     "E501",  # line too long (handled by black)
     "B008",  # do not perform function calls in argument defaults
+    "B024",  # abstract class without abstract methods (used for base classes)
+    "B904",  # raise from within except (not always needed)
     "C901",  # too complex
+    "E402",  # module level import not at top (needed for mocking in tests)
+    "F401",  # imported but unused (needed for re-exports in __init__.py)
 ]
-exclude = [
-    ".git",
-    ".venv",
-    "venv",
-    "build",
-    "dist",
-    "migrations",
-]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "E402"]
+"tests/*" = ["E402", "F401", "B"]
+"conftest.py" = ["E402", "F401"]
 
 [tool.mypy]
 python_version = "3.10"

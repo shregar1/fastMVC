@@ -12,15 +12,15 @@ from repositories.product import ProductRepository
 
 class ProductRepositoryDependency(IDependency):
     """Dependency provider for ProductRepository."""
-    
+
     @staticmethod
     def derive(session: Session) -> ProductRepository:
         """
         Create repository instance with session.
-        
+
         Args:
             session: SQLAlchemy session.
-            
+
         Returns:
             Configured ProductRepository.
         """

@@ -2,11 +2,12 @@
 Tests for UserRepository class.
 """
 
+from unittest.mock import MagicMock
+
 import pytest
-from unittest.mock import MagicMock, patch
-from datetime import datetime
-from repositories.user import UserRepository
+
 from models.user import User
+from repositories.user import UserRepository
 
 
 class TestUserRepository:
@@ -87,24 +88,24 @@ class TestUserRepository:
         """Test retrieving user by email and password when found."""
         mock_user = MagicMock(spec=User)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_user
-        
+
         result = repository.retrieve_record_by_email_and_password(
             email="test@example.com",
             password="hashed_password"
         )
-        
+
         assert result == mock_user
         mock_session.query.assert_called()
 
     def test_retrieve_record_by_email_and_password_not_found(self, repository, mock_session):
         """Test retrieving user by email and password when not found."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
-        
+
         result = repository.retrieve_record_by_email_and_password(
             email="nonexistent@example.com",
             password="wrong_password"
         )
-        
+
         assert result is None
 
     # Tests for retrieve_record_by_email
@@ -112,29 +113,29 @@ class TestUserRepository:
         """Test retrieving user by email when found."""
         mock_user = MagicMock(spec=User)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_user
-        
+
         result = repository.retrieve_record_by_email(email="test@example.com")
-        
+
         assert result == mock_user
 
     def test_retrieve_record_by_email_not_found(self, repository, mock_session):
         """Test retrieving user by email when not found."""
         mock_session.query.return_value.filter.return_value.first.return_value = None
-        
+
         result = repository.retrieve_record_by_email(email="nonexistent@example.com")
-        
+
         assert result is None
 
     def test_retrieve_record_by_email_with_deleted(self, repository, mock_session):
         """Test retrieving deleted user by email."""
         mock_user = MagicMock(spec=User)
         mock_session.query.return_value.filter.return_value.first.return_value = mock_user
-        
+
         result = repository.retrieve_record_by_email(
             email="test@example.com",
             is_deleted=True
         )
-        
+
         assert result == mock_user
 
     # Tests for retrieve_record_by_id_and_is_logged_in
@@ -142,24 +143,24 @@ class TestUserRepository:
         """Test retrieving users by ID and login status."""
         mock_users = [MagicMock(spec=User), MagicMock(spec=User)]
         mock_session.query.return_value.filter.return_value.all.return_value = mock_users
-        
+
         result = repository.retrieve_record_by_id_and_is_logged_in(
             id="1",
             is_logged_in=True
         )
-        
+
         assert result == mock_users
         assert len(result) == 2
 
     def test_retrieve_record_by_id_and_is_logged_in_empty(self, repository, mock_session):
         """Test retrieving users by ID and login status when empty."""
         mock_session.query.return_value.filter.return_value.all.return_value = []
-        
+
         result = repository.retrieve_record_by_id_and_is_logged_in(
             id="999",
             is_logged_in=True
         )
-        
+
         assert result == []
 
     # Tests for retrieve_record_by_id_is_logged_in
@@ -167,22 +168,22 @@ class TestUserRepository:
         """Test retrieving single user by ID and login status."""
         mock_user = MagicMock(spec=User)
         mock_session.query.return_value.filter.return_value.one_or_none.return_value = mock_user
-        
+
         result = repository.retrieve_record_by_id_is_logged_in(
             id=1,
             is_logged_in=True
         )
-        
+
         assert result == mock_user
 
     def test_retrieve_record_by_id_is_logged_in_not_found(self, repository, mock_session):
         """Test retrieving single user by ID when not found."""
         mock_session.query.return_value.filter.return_value.one_or_none.return_value = None
-        
+
         result = repository.retrieve_record_by_id_is_logged_in(
             id=999,
             is_logged_in=True
         )
-        
+
         assert result is None
 

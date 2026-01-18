@@ -3,6 +3,7 @@ Tests for DictionaryUtility class.
 """
 
 import pytest
+
 from utilities.dictionary import DictionaryUtility
 
 

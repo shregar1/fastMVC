@@ -2,10 +2,6 @@
 Tests for FastMVC application.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
-from fastapi.testclient import TestClient
-from http import HTTPStatus
 
 
 class TestAppConfiguration:
@@ -49,7 +45,7 @@ class TestRouterConfiguration:
         """Test user router is included."""
         from app import app
         routes = [route.path for route in app.routes]
-        
+
         # User routes should be included
         assert "/user/login" in routes or any("/user" in r for r in routes)
 
@@ -60,9 +56,9 @@ class TestEnvironmentVariables:
     def test_rate_limit_variables_loaded(self):
         """Test rate limit environment variables are loaded."""
         from app import (
-            RATE_LIMIT_REQUESTS_PER_MINUTE,
+            RATE_LIMIT_BURST_LIMIT,
             RATE_LIMIT_REQUESTS_PER_HOUR,
-            RATE_LIMIT_BURST_LIMIT
+            RATE_LIMIT_REQUESTS_PER_MINUTE,
         )
         assert isinstance(RATE_LIMIT_REQUESTS_PER_MINUTE, int)
         assert isinstance(RATE_LIMIT_REQUESTS_PER_HOUR, int)

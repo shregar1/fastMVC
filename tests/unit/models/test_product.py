@@ -2,7 +2,6 @@
 Tests for Product model.
 """
 
-import pytest
 from datetime import datetime
 
 from models.product import Product
@@ -10,7 +9,7 @@ from models.product import Product
 
 class TestProductModel:
     """Test cases for Product model."""
-    
+
     def test_create_product(self):
         """Test Product instance creation."""
         product = Product(
@@ -22,11 +21,11 @@ class TestProductModel:
             created_by=1,
             created_on=datetime.now(),
         )
-        
+
         assert product.name == "Test Product"
         assert product.is_active is True
         assert product.is_deleted is False
-    
+
     def test_product_to_dict(self):
         """Test Product.to_dict() method."""
         product = Product(
@@ -37,17 +36,17 @@ class TestProductModel:
             is_active=True,
             created_on=datetime(2024, 1, 1, 12, 0, 0),
         )
-        
+
         result = product.to_dict()
-        
+
         assert result["id"] == 1
         assert result["urn"] == "01ABC123DEF456GHI789JKL0"
         assert result["name"] == "Test Product"
         assert result["description"] == "Description"
         assert result["is_active"] is True
-    
+
     def test_product_repr(self):
         """Test Product.__repr__() method."""
         product = Product(id=1, name="Test")
-        
+
         assert "<Product(id=1, name=Test)>" in repr(product)

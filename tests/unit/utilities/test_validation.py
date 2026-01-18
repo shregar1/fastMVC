@@ -2,10 +2,10 @@
 Tests for ValidationUtility and SecurityValidators classes.
 """
 
-import pytest
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
-from utilities.validation import ValidationUtility, SecurityValidators
+from unittest.mock import MagicMock, patch
+
+from utilities.validation import SecurityValidators, ValidationUtility
 
 
 class TestValidationUtility:
@@ -67,7 +67,7 @@ class TestValidationUtility:
         mock_result = MagicMock()
         mock_result.email = "user@example.com"
         mock_validate_email.return_value = mock_result
-        
+
         result = ValidationUtility.validate_email_format("user@example.com")
         assert result["is_valid"] is True
         assert "normalized_email" in result
@@ -84,7 +84,7 @@ class TestValidationUtility:
         mock_result = MagicMock()
         mock_result.email = "user+tag@example.com"
         mock_validate_email.return_value = mock_result
-        
+
         result = ValidationUtility.validate_email_format("user+tag@example.com")
         assert result["is_valid"] is True
 

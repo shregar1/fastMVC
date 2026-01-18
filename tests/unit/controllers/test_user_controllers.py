@@ -2,20 +2,18 @@
 Tests for user controllers.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-from http import HTTPStatus
-
 # Mock bcrypt before importing controllers that might depend on it
 import sys
+from unittest.mock import MagicMock
+
+import pytest
+
 sys.modules['bcrypt'] = MagicMock()
 
+from constants.api_lk import APILK
 from controllers.user.login import UserLoginController
 from controllers.user.logout import UserLogoutController
 from controllers.user.register import UserRegistrationController
-from constants.api_status import APIStatus
-from constants.api_lk import APILK
-from dtos.responses.base import BaseResponseDTO
 
 
 class TestUserLoginController:

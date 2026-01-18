@@ -16,7 +16,7 @@ Usage:
     ...     result = await service.run(request_dto)
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 from abstractions.dependency import IDependency
 from services.user.login import UserLoginService

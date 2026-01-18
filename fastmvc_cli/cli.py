@@ -19,15 +19,15 @@ Example:
     $ fastmvc info
 """
 
-import os
 import subprocess
-import click
 import sys
 from pathlib import Path
 
+import click
+
 from fastmvc_cli import __version__
-from fastmvc_cli.generator import ProjectGenerator
 from fastmvc_cli.entity_generator import EntityGenerator
+from fastmvc_cli.generator import ProjectGenerator
 
 
 @click.group()
@@ -35,24 +35,24 @@ from fastmvc_cli.entity_generator import EntityGenerator
 def cli():
     """
     FastMVC - Production-grade MVC Framework for FastAPI.
-    
+
     Generate new FastAPI projects with a clean MVC architecture,
     built-in authentication, rate limiting, security headers,
     and comprehensive documentation.
-    
+
     \b
     Quick Start:
         $ fastmvc generate my_project
         $ cd my_project
         $ pip install -r requirements.txt
         $ python -m uvicorn app:app --reload
-    
+
     \b
     Add Entities:
         $ cd my_project
         $ fastmvc add entity Product
         $ fastmvc add entity Order
-    
+
     \b
     Database Migrations:
         $ fastmvc migrate generate "add products table"
@@ -87,14 +87,14 @@ def cli():
 def generate(project_name: str, output_dir: str, git: bool, venv: bool, install: bool):
     """
     Generate a new FastMVC project.
-    
+
     Creates a new FastAPI project with the FastMVC architecture pattern,
     including all necessary directories, configuration files, and boilerplate code.
-    
+
     \b
     Arguments:
         PROJECT_NAME: Name of the new project (will be used as directory name)
-    
+
     \b
     Examples:
         $ fastmvc generate my_api
@@ -114,7 +114,7 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
     click.secho("║          Production-grade MVC Framework for FastAPI          ║", fg="cyan")
     click.secho("╚══════════════════════════════════════════════════════════════╝", fg="cyan")
     click.echo()
-    
+
     # Validate project name
     if not project_name.replace("_", "").replace("-", "").isalnum():
         click.secho(
@@ -123,7 +123,7 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
             fg="red"
         )
         sys.exit(1)
-    
+
     # Create generator and run
     generator = ProjectGenerator(
         project_name=project_name,
@@ -132,7 +132,7 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
         create_venv=venv,
         install_deps=install
     )
-    
+
     try:
         generator.generate()
         click.echo()
@@ -147,8 +147,8 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
         click.echo("  5. fastmvc migrate upgrade  # Run database migrations")
         click.echo("  6. python -m uvicorn app:app --reload")
         click.echo()
-        click.secho(f"  → Your API will be available at http://localhost:8000", fg="cyan")
-        click.secho(f"  → API docs at http://localhost:8000/docs", fg="cyan")
+        click.secho("  → Your API will be available at http://localhost:8000", fg="cyan")
+        click.secho("  → API docs at http://localhost:8000/docs", fg="cyan")
         click.echo()
     except Exception as e:
         click.secho(f"✗ Error generating project: {e}", fg="red")
@@ -163,11 +163,11 @@ def generate(project_name: str, output_dir: str, git: bool, venv: bool, install:
 def add():
     """
     Add components to an existing FastMVC project.
-    
+
     \b
     Available subcommands:
         entity - Generate a new entity with full CRUD
-    
+
     \b
     Examples:
         $ fastmvc add entity Product
@@ -186,19 +186,19 @@ def add():
 def add_entity(entity_name: str, tests: bool):
     """
     Generate a new entity with full CRUD scaffolding.
-    
+
     Creates model, repository, service, controller, DTOs, dependencies,
     and tests for the specified entity.
-    
+
     \b
     Arguments:
         ENTITY_NAME: Name of the entity in PascalCase (e.g., Product, Order)
-    
+
     \b
     Examples:
         $ fastmvc add entity Product
         $ fastmvc add entity OrderItem --no-tests
-    
+
     \b
     Generated files:
         • models/<entity>.py
@@ -212,7 +212,7 @@ def add_entity(entity_name: str, tests: bool):
     click.echo()
     click.secho(f"→ Generating entity: {entity_name}", fg="blue", bold=True)
     click.echo()
-    
+
     # Validate entity name
     if not entity_name[0].isupper():
         click.secho(
@@ -221,7 +221,7 @@ def add_entity(entity_name: str, tests: bool):
         )
         entity_name = entity_name[0].upper() + entity_name[1:]
         click.secho(f"  Using: {entity_name}", fg="white")
-    
+
     # Check we're in a FastMVC project
     project_path = Path.cwd()
     if not (project_path / "app.py").exists():
@@ -231,7 +231,7 @@ def add_entity(entity_name: str, tests: bool):
             fg="red"
         )
         sys.exit(1)
-    
+
     try:
         generator = EntityGenerator(
             entity_name=entity_name,
@@ -239,20 +239,20 @@ def add_entity(entity_name: str, tests: bool):
             with_tests=tests,
         )
         generator.generate()
-        
+
         click.echo()
         click.secho("✓ Entity generated successfully!", fg="green", bold=True)
         click.echo()
         click.secho("Next steps:", fg="yellow", bold=True)
         click.echo()
-        click.echo(f"  1. Review generated files in models/, services/, controllers/")
-        click.echo(f"  2. Register the router in app.py:")
+        click.echo("  1. Review generated files in models/, services/, controllers/")
+        click.echo("  2. Register the router in app.py:")
         click.echo()
         click.secho(f"     from controllers.{entity_name.lower()} import router as {entity_name.lower()}_router", fg="white", dim=True)
         click.secho(f"     app.include_router({entity_name.lower()}_router)", fg="white", dim=True)
         click.echo()
         click.echo(f"  3. Generate migration: fastmvc migrate generate 'add_{entity_name.lower()}_table'")
-        click.echo(f"  4. Apply migration: fastmvc migrate upgrade")
+        click.echo("  4. Apply migration: fastmvc migrate upgrade")
         click.echo()
     except Exception as e:
         click.secho(f"✗ Error generating entity: {e}", fg="red")
@@ -267,7 +267,7 @@ def add_entity(entity_name: str, tests: bool):
 def migrate():
     """
     Database migration commands using Alembic.
-    
+
     \b
     Available subcommands:
         generate - Create a new migration
@@ -275,7 +275,7 @@ def migrate():
         downgrade - Rollback migrations
         status   - Show current migration status
         history  - Show migration history
-    
+
     \b
     Examples:
         $ fastmvc migrate generate "add users table"
@@ -295,38 +295,38 @@ def migrate():
 def migrate_generate(message: str, autogenerate: bool):
     """
     Generate a new database migration.
-    
+
     Creates a new migration file based on changes to your SQLAlchemy models.
-    
+
     \b
     Arguments:
         MESSAGE: Description of the migration (e.g., "add products table")
-    
+
     \b
     Examples:
         $ fastmvc migrate generate "add products table"
         $ fastmvc migrate generate "add email index" --no-autogenerate
     """
     click.secho(f"→ Generating migration: {message}", fg="blue")
-    
+
     # Check for alembic.ini
     if not Path("alembic.ini").exists():
         click.secho("✗ alembic.ini not found. Are you in a FastMVC project?", fg="red")
         sys.exit(1)
-    
+
     try:
         cmd = ["alembic", "revision"]
         if autogenerate:
             cmd.append("--autogenerate")
         cmd.extend(["-m", message])
-        
+
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             click.secho("✓ Migration generated successfully!", fg="green")
             click.echo(result.stdout)
         else:
-            click.secho(f"✗ Migration generation failed:", fg="red")
+            click.secho("✗ Migration generation failed:", fg="red")
             click.echo(result.stderr)
             sys.exit(1)
     except FileNotFoundError:
@@ -339,11 +339,11 @@ def migrate_generate(message: str, autogenerate: bool):
 def migrate_upgrade(revision: str):
     """
     Apply database migrations.
-    
+
     \b
     Arguments:
         REVISION: Target revision (default: "head" for latest)
-    
+
     \b
     Examples:
         $ fastmvc migrate upgrade        # Apply all pending migrations
@@ -351,20 +351,20 @@ def migrate_upgrade(revision: str):
         $ fastmvc migrate upgrade +1     # Apply next migration
     """
     click.secho(f"→ Upgrading database to: {revision}", fg="blue")
-    
+
     try:
         result = subprocess.run(
             ["alembic", "upgrade", revision],
             capture_output=True,
             text=True
         )
-        
+
         if result.returncode == 0:
             click.secho("✓ Database upgraded successfully!", fg="green")
             if result.stdout:
                 click.echo(result.stdout)
         else:
-            click.secho(f"✗ Upgrade failed:", fg="red")
+            click.secho("✗ Upgrade failed:", fg="red")
             click.echo(result.stderr)
             sys.exit(1)
     except FileNotFoundError:
@@ -377,11 +377,11 @@ def migrate_upgrade(revision: str):
 def migrate_downgrade(revision: str):
     """
     Rollback database migrations.
-    
+
     \b
     Arguments:
         REVISION: Target revision (default: "-1" for previous)
-    
+
     \b
     Examples:
         $ fastmvc migrate downgrade      # Rollback one migration
@@ -389,20 +389,20 @@ def migrate_downgrade(revision: str):
         $ fastmvc migrate downgrade base # Rollback all migrations
     """
     click.secho(f"→ Downgrading database to: {revision}", fg="yellow")
-    
+
     try:
         result = subprocess.run(
             ["alembic", "downgrade", revision],
             capture_output=True,
             text=True
         )
-        
+
         if result.returncode == 0:
             click.secho("✓ Database downgraded successfully!", fg="green")
             if result.stdout:
                 click.echo(result.stdout)
         else:
-            click.secho(f"✗ Downgrade failed:", fg="red")
+            click.secho("✗ Downgrade failed:", fg="red")
             click.echo(result.stderr)
             sys.exit(1)
     except FileNotFoundError:
@@ -414,18 +414,18 @@ def migrate_downgrade(revision: str):
 def migrate_status():
     """
     Show current database migration status.
-    
+
     Displays the current revision applied to the database.
     """
     click.secho("→ Checking migration status...", fg="blue")
-    
+
     try:
         result = subprocess.run(
             ["alembic", "current"],
             capture_output=True,
             text=True
         )
-        
+
         if result.returncode == 0:
             click.secho("Current revision:", fg="cyan", bold=True)
             click.echo(result.stdout or "  No migrations applied yet")
@@ -441,18 +441,18 @@ def migrate_status():
 def migrate_history(verbose: bool):
     """
     Show migration history.
-    
+
     Displays all available migrations and their status.
     """
     click.secho("→ Migration history:", fg="blue")
-    
+
     try:
         cmd = ["alembic", "history"]
         if verbose:
             cmd.append("--verbose")
-        
+
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             click.echo(result.stdout or "  No migrations found")
         else:
@@ -470,7 +470,7 @@ def migrate_history(verbose: bool):
 def info():
     """
     Display information about FastMVC.
-    
+
     Shows details about the framework including version,
     features, and documentation links.
     """
@@ -482,7 +482,7 @@ def info():
     click.echo()
     click.echo(f"  Version:     {__version__}")
     click.echo(f"  Python:      {sys.version.split()[0]}")
-    click.echo(f"  PyPI:        https://pypi.org/project/pyfastmvc/")
+    click.echo("  PyPI:        https://pypi.org/project/pyfastmvc/")
     click.echo()
     click.secho("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", fg="white", dim=True)
     click.secho("Core Features:", fg="yellow", bold=True)

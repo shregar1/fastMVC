@@ -15,15 +15,15 @@ Usage:
     >>> app.include_router(router)
 """
 
-from fastapi import APIRouter
 from http import HTTPMethod
+
+from fastapi import APIRouter
 
 from constants.api_lk import APILK
 from controllers.user.login import UserLoginController
-from controllers.user.register import UserRegistrationController
 from controllers.user.logout import UserLogoutController
+from controllers.user.register import UserRegistrationController
 from start_utils import logger
-
 
 router = APIRouter(prefix="/user")
 """User router with /user prefix. Handles authentication operations."""

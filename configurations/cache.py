@@ -57,7 +57,7 @@ class CacheConfiguration:
             CacheConfiguration: The singleton configuration instance.
         """
         if cls._instance is None:
-            cls._instance = super(CacheConfiguration, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.config = {}
             cls._instance.load_config()
         return cls._instance
@@ -78,7 +78,7 @@ class CacheConfiguration:
             - JSONDecodeError: Logged if config file contains invalid JSON
         """
         try:
-            with open("config/cache/config.json", "r") as file:
+            with open("config/cache/config.json") as file:
                 self.config = json.load(file)
             logger.debug("Cache config loaded successfully.")
 

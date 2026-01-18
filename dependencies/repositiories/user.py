@@ -16,7 +16,7 @@ Usage:
     ...     user = repo.find_by_email("user@example.com")
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 from repositories.user import UserRepository
 from start_utils import logger

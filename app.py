@@ -26,37 +26,36 @@ Endpoints:
 """
 
 import os
-import uvicorn
+from http import HTTPStatus
 
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from http import HTTPStatus
+
+# Import middlewares from fastmvc-middleware package
+from FastMiddleware import (
+    CORSMiddleware,
+    LoggingMiddleware,
+    RateLimitConfig,
+    # Rate Limiting
+    RateLimitMiddleware,
+    # Request Context & Tracking
+    RequestContextMiddleware,
+    SecurityHeadersConfig,
+    # Security
+    SecurityHeadersMiddleware,
+    TimingMiddleware,
+    TrustedHostMiddleware,
+)
 from loguru import logger
 
 from constants.default import Default
 from controllers.user import router as UserRouter
 
-# Import middlewares from fastmvc-middleware package
-from FastMiddleware import (
-    # Security
-    SecurityHeadersMiddleware,
-    SecurityHeadersConfig,
-    TrustedHostMiddleware,
-    CORSMiddleware,
-    # Rate Limiting
-    RateLimitMiddleware,
-    RateLimitConfig,
-    # Request Context & Tracking
-    RequestContextMiddleware,
-    TimingMiddleware,
-    LoggingMiddleware,
-)
-
 # Custom authentication middleware (app-specific with user repository)
 from middlewares.authetication import AuthenticationMiddleware
-
 
 # Initialize FastAPI application
 app = FastAPI(

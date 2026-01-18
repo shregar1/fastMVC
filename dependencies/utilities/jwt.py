@@ -16,10 +16,10 @@ Usage:
     ...     token = jwt_util.generate_token(payload)
 """
 
-from typing import Callable
+from collections.abc import Callable
 
-from utilities.jwt import JWTUtility
 from start_utils import logger
+from utilities.jwt import JWTUtility
 
 
 class JWTUtilityDependency:

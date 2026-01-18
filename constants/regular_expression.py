@@ -12,7 +12,7 @@ Usage:
 """
 
 import re
-from typing import Final, List
+from typing import Final
 
 
 class RegularExpression:
@@ -123,7 +123,7 @@ class RegularExpression:
         >>> RegularExpression.ALPHANUMERIC_PATTERN.match("test@item")  # None
     """
 
-    DANGEROUS_SQL_INJECTION_PATTERNS: Final[List[str]] = [
+    DANGEROUS_SQL_INJECTION_PATTERNS: Final[list[str]] = [
         r'(\b(union|select|insert|update|delete|drop|create|alter|exec|\
             execute)\b)',
         r'(\b(or|and)\b\s+\d+\s*=\s*\d+)',
@@ -148,7 +148,7 @@ class RegularExpression:
         parameterized queries as the primary defense against SQL injection.
     """
 
-    DANGEROUS_XSS_PATTERNS: Final[List[str]] = [
+    DANGEROUS_XSS_PATTERNS: Final[list[str]] = [
         r'<script[^>]*>.*?</script>',
         r'javascript:',
         r'on\w+\s*=',
@@ -170,7 +170,7 @@ class RegularExpression:
         proper output encoding and Content Security Policy headers.
     """
 
-    DANGEROUS_PATH_TRAVERSAL_PATTERNS: Final[List[str]] = [
+    DANGEROUS_PATH_TRAVERSAL_PATTERNS: Final[list[str]] = [
         r'\.\./',
         r'\.\.\\',
         r'%2e%2e%2f',

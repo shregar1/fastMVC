@@ -16,6 +16,7 @@ Example:
 """
 
 from abc import ABC
+
 from loguru import logger
 
 

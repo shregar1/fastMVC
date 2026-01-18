@@ -13,8 +13,8 @@ Usage:
 
 import json
 import os
-from typing import Dict, Any, Optional
 from pathlib import Path
+from typing import Any
 
 from constants.default import Default
 from dtos.configurations.security import SecurityConfigurationDTO
@@ -79,7 +79,7 @@ class SecurityConfiguration:
         - SECURITY_MAX_LOGIN_ATTEMPTS
     """
 
-    def __init__(self, config_path: Optional[str] = None) -> None:
+    def __init__(self, config_path: str | None = None) -> None:
         """
         Initialize the SecurityConfiguration.
 
@@ -88,7 +88,7 @@ class SecurityConfiguration:
                 Defaults to "config/security/config.json".
         """
         self.config_path = config_path or "config/security/config.json"
-        self._config: Optional[SecurityConfigurationDTO] = None
+        self._config: SecurityConfigurationDTO | None = None
 
     def get_config(self) -> SecurityConfigurationDTO:
         """
@@ -130,7 +130,7 @@ class SecurityConfiguration:
                 )
                 self._config = self._get_default_config()
                 return
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 config_data = json.load(f)
             config_data = self._override_with_env_vars(config_data)
             self._config = SecurityConfigurationDTO(**config_data)
@@ -141,8 +141,8 @@ class SecurityConfiguration:
 
     def _override_with_env_vars(
         self,
-        config_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        config_data: dict[str, Any],
+    ) -> dict[str, Any]:
         """
         Apply environment variable overrides to configuration.
 

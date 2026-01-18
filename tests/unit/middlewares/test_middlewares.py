@@ -4,29 +4,36 @@ Tests for middleware classes.
 Tests both local middlewares and FastMiddleware package components.
 """
 
-import pytest
-import time
-from unittest.mock import MagicMock, patch, AsyncMock
-from http import HTTPStatus, HTTPMethod
+from http import HTTPMethod
+from unittest.mock import MagicMock, patch
 
-# Test local middlewares
-from middlewares.security_headers import SecurityHeadersConfig as LocalSecurityHeadersConfig
-from middlewares.security_headers import SecurityHeadersMiddleware as LocalSecurityHeadersMiddleware
-from middlewares.rate_limit import RateLimitConfig as LocalRateLimitConfig
-from middlewares.rate_limit import RateLimitStore, RateLimitMiddleware as LocalRateLimitMiddleware
-from middlewares.request_context import RequestContextMiddleware as LocalRequestContextMiddleware
+import pytest
 
 # Test FastMiddleware package components
 from FastMiddleware import (
-    SecurityHeadersMiddleware,
-    SecurityHeadersConfig,
-    RateLimitMiddleware,
-    RateLimitConfig,
-    RequestContextMiddleware,
-    TimingMiddleware,
-    LoggingMiddleware,
     CORSMiddleware,
+    LoggingMiddleware,
+    RateLimitConfig,
+    RateLimitMiddleware,
+    RequestContextMiddleware,
+    SecurityHeadersConfig,
+    SecurityHeadersMiddleware,
+    TimingMiddleware,
     TrustedHostMiddleware,
+)
+
+from middlewares.rate_limit import RateLimitConfig as LocalRateLimitConfig
+from middlewares.rate_limit import RateLimitStore
+from middlewares.request_context import (
+    RequestContextMiddleware as LocalRequestContextMiddleware,
+)
+
+# Test local middlewares
+from middlewares.security_headers import (
+    SecurityHeadersConfig as LocalSecurityHeadersConfig,
+)
+from middlewares.security_headers import (
+    SecurityHeadersMiddleware as LocalSecurityHeadersMiddleware,
 )
 
 
@@ -140,19 +147,19 @@ class TestLocalSecurityHeadersMiddleware:
     async def test_dispatch_adds_headers(self, app):
         """Test dispatch adds security headers."""
         middleware = LocalSecurityHeadersMiddleware(app)
-        
+
         request = MagicMock()
         request.url.path = "/api/test"
         request.method = "GET"
-        
+
         response = MagicMock()
         response.headers = {}
-        
+
         async def call_next(req):
             return response
-        
+
         result = await middleware.dispatch(request, call_next)
-        
+
         assert "X-Frame-Options" in result.headers
         assert "X-Content-Type-Options" in result.headers
         assert "X-XSS-Protection" in result.headers
@@ -213,7 +220,7 @@ class TestLocalRateLimitStore:
         """Test sliding window blocks when limit exceeded."""
         for _ in range(5):
             await store.check_sliding_window("test-key", 5, 60)
-        
+
         allowed, count = await store.check_sliding_window("test-key", 5, 60)
         assert allowed is False
 
@@ -222,7 +229,7 @@ class TestLocalRateLimitStore:
         """Test cleanup removes old entries."""
         # Add an entry
         await store.check_sliding_window("old-key", 10, 60)
-        
+
         # Cleanup should work without errors
         await store.cleanup_old_entries(max_age=0)
 
@@ -392,22 +399,22 @@ class TestAuthenticationMiddleware:
     async def test_unprotected_route_passes_through(self, mock_logger, mock_app):
         """Test unprotected routes pass through without auth."""
         from middlewares.authetication import AuthenticationMiddleware
-        
+
         middleware = AuthenticationMiddleware(mock_app)
-        
+
         request = MagicMock()
         request.state = MagicMock()
         request.state.urn = "test-urn"
         request.url.path = "/health"
         request.method = "GET"
-        
+
         expected_response = MagicMock()
-        
+
         async def call_next(req):
             return expected_response
-        
+
         result = await middleware.dispatch(request, call_next)
-        
+
         assert result == expected_response
 
     @pytest.mark.asyncio
@@ -417,21 +424,20 @@ class TestAuthenticationMiddleware:
     async def test_options_request_passes_through(self, mock_logger, mock_app):
         """Test OPTIONS requests pass through."""
         from middlewares.authetication import AuthenticationMiddleware
-        from http import HTTPMethod
-        
+
         middleware = AuthenticationMiddleware(mock_app)
-        
+
         request = MagicMock()
         request.state = MagicMock()
         request.state.urn = "test-urn"
         request.url.path = "/api/protected"
         request.method = HTTPMethod.OPTIONS
-        
+
         expected_response = MagicMock()
-        
+
         async def call_next(req):
             return expected_response
-        
+
         result = await middleware.dispatch(request, call_next)
-        
+
         assert result == expected_response

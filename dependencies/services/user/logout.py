@@ -16,7 +16,7 @@ Usage:
     ...     result = await service.run()
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 from abstractions.dependency import IDependency
 from services.user.logout import UserLogoutService

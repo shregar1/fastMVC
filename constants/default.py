@@ -10,7 +10,7 @@ Usage:
     >>> token_expiry = config.get("expiry", Default.ACCESS_TOKEN_EXPIRE_MINUTES)
 """
 
-from typing import Any, Dict, Final
+from typing import Any, Final
 
 
 class Default:
@@ -69,7 +69,7 @@ class Default:
     RATE_LIMIT_BURST_LIMIT: Final[int] = 10
     """Maximum burst requests allowed."""
 
-    SECURITY_CONFIGURATION: Final[Dict[str, Any]] = {
+    SECURITY_CONFIGURATION: Final[dict[str, Any]] = {
         "rate_limiting": {
             "requests_per_minute": 60,
             "requests_per_hour": 1000,

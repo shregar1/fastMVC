@@ -64,7 +64,7 @@ class DBConfiguration:
             DBConfiguration: The singleton configuration instance.
         """
         if cls._instance is None:
-            cls._instance = super(DBConfiguration, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance.config = {}
             cls._instance.load_config()
         return cls._instance
@@ -85,7 +85,7 @@ class DBConfiguration:
             - JSONDecodeError: Logged if config file contains invalid JSON
         """
         try:
-            with open("config/db/config.json", "r") as file:
+            with open("config/db/config.json") as file:
                 self.config = json.load(file)
             logger.debug("DB config loaded successfully.")
 

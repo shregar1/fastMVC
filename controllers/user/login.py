@@ -27,30 +27,26 @@ Response:
     }
 """
 
-from fastapi import Request, Depends
-from fastapi.responses import JSONResponse
+from collections.abc import Callable
 from http import HTTPStatus
-from sqlalchemy.orm import Session
-from typing import Callable
 
-from controllers.user.abstraction import IUserController
+from fastapi import Depends, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
 from constants.api_lk import APILK
 from constants.api_status import APIStatus
-
+from controllers.user.abstraction import IUserController
 from dependencies.db import DBDependency
 from dependencies.repositiories.user import UserRepositoryDependency
 from dependencies.services.user.login import UserLoginServiceDependency
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dependencies.utilities.jwt import JWTUtilityDependency
-
 from dtos.requests.user.login import UserLoginRequestDTO
 from dtos.responses.base import BaseResponseDTO
-
 from errors.bad_input_error import BadInputError
 from errors.not_found_error import NotFoundError
 from errors.unexpected_response_error import UnexpectedResponseError
-
 from repositories.user import UserRepository
 from utilities.dictionary import DictionaryUtility
 from utilities.jwt import JWTUtility

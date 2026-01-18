@@ -1,6 +1,6 @@
 from datetime import datetime
-import ulid
 
+import ulid
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 

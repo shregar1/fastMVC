@@ -12,10 +12,12 @@ Routes:
     DELETE /product/{id}    - Delete product
 """
 
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
+from loguru import logger
 from sqlalchemy.orm import Session
 
 from constants.api_status import APIStatus
@@ -23,13 +25,11 @@ from dependencies.db import DBDependency
 from dependencies.utilities.dictionary import DictionaryUtilityDependency
 from dtos.requests.product.create import ProductCreateRequestDTO
 from dtos.requests.product.update import ProductUpdateRequestDTO
-from errors.not_found_error import NotFoundError
 from errors.bad_input_error import BadInputError
+from errors.not_found_error import NotFoundError
 from repositories.product import ProductRepository
 from services.product.crud import ProductCRUDService
 from utilities.dictionary import DictionaryUtility
-
-from loguru import logger
 
 logger.debug("Registering Product routes.")
 
@@ -70,26 +70,26 @@ async def create_product(
 ) -> JSONResponse:
     """
     Create a new product.
-    
+
     Args:
         request: FastAPI request.
         request_payload: Product creation data.
-        
+
     Returns:
         JSONResponse with created product.
     """
     try:
         urn = getattr(request.state, "urn", "unknown")
         user_id = getattr(request.state, "user_id", 1)
-        
+
         service = service_factory(
             urn=urn,
             user_id=user_id,
             repository=repository,
         )
-        
+
         response = await service.create(request_payload)
-        
+
         return JSONResponse(
             status_code=200,
             content=dictionary_utility.convert_dict_keys_to_camel_case(
@@ -132,26 +132,26 @@ async def list_products(
 ) -> JSONResponse:
     """
     List all products with pagination.
-    
+
     Args:
         skip: Records to skip.
         limit: Max records to return.
-        
+
     Returns:
         JSONResponse with list of products.
     """
     try:
         urn = getattr(request.state, "urn", "unknown")
         user_id = getattr(request.state, "user_id", 1)
-        
+
         service = service_factory(
             urn=urn,
             user_id=user_id,
             repository=repository,
         )
-        
+
         response = await service.get_all(skip=skip, limit=limit)
-        
+
         return JSONResponse(
             status_code=200,
             content=dictionary_utility.convert_dict_keys_to_camel_case(
@@ -182,25 +182,25 @@ async def get_product(
 ) -> JSONResponse:
     """
     Get a product by ID.
-    
+
     Args:
         record_id: Product ID.
-        
+
     Returns:
         JSONResponse with product data.
     """
     try:
         urn = getattr(request.state, "urn", "unknown")
         user_id = getattr(request.state, "user_id", 1)
-        
+
         service = service_factory(
             urn=urn,
             user_id=user_id,
             repository=repository,
         )
-        
+
         response = await service.get_by_id(record_id)
-        
+
         return JSONResponse(
             status_code=200,
             content=dictionary_utility.convert_dict_keys_to_camel_case(
@@ -243,26 +243,26 @@ async def update_product(
 ) -> JSONResponse:
     """
     Update a product.
-    
+
     Args:
         record_id: Product ID.
         request_payload: Update data.
-        
+
     Returns:
         JSONResponse with updated product.
     """
     try:
         urn = getattr(request.state, "urn", "unknown")
         user_id = getattr(request.state, "user_id", 1)
-        
+
         service = service_factory(
             urn=urn,
             user_id=user_id,
             repository=repository,
         )
-        
+
         response = await service.update(record_id, request_payload)
-        
+
         return JSONResponse(
             status_code=200,
             content=dictionary_utility.convert_dict_keys_to_camel_case(
@@ -304,25 +304,25 @@ async def delete_product(
 ) -> JSONResponse:
     """
     Delete a product (soft delete).
-    
+
     Args:
         record_id: Product ID.
-        
+
     Returns:
         JSONResponse confirming deletion.
     """
     try:
         urn = getattr(request.state, "urn", "unknown")
         user_id = getattr(request.state, "user_id", 1)
-        
+
         service = service_factory(
             urn=urn,
             user_id=user_id,
             repository=repository,
         )
-        
+
         response = await service.delete(record_id)
-        
+
         return JSONResponse(
             status_code=200,
             content=dictionary_utility.convert_dict_keys_to_camel_case(

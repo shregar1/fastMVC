@@ -2,14 +2,14 @@
 Tests for constants classes.
 """
 
-import pytest
 import re
-from constants.api_status import APIStatus
+
 from constants.api_lk import APILK
+from constants.api_status import APIStatus
+from constants.db.table import Table
 from constants.default import Default
 from constants.payload_type import RequestPayloadType, ResponsePayloadType
 from constants.regular_expression import RegularExpression
-from constants.db.table import Table
 
 
 class TestAPIStatus:

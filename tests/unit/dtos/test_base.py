@@ -4,6 +4,7 @@ Tests for EnhancedBaseModel class.
 
 import pytest
 from pydantic import ValidationError
+
 from dtos.base import EnhancedBaseModel
 
 
@@ -27,7 +28,7 @@ class TestEnhancedBaseModel:
         """Test that non-string values are unchanged."""
         class IntDTO(EnhancedBaseModel):
             value: int
-        
+
         dto = IntDTO(value=123)
         assert dto.value == 123
 
@@ -70,7 +71,7 @@ class TestEnhancedBaseModel:
         class MultiFieldDTO(EnhancedBaseModel):
             field1: str
             field2: str
-        
+
         dto = MultiFieldDTO(
             field1="SELECT * FROM users",
             field2="<script>alert('xss')</script>"
@@ -89,24 +90,24 @@ class TestEnhancedBaseModel:
     def test_config_use_enum_values(self):
         """Test that enum values are used in serialization."""
         from enum import Enum
-        
+
         class Status(Enum):
             ACTIVE = "active"
             INACTIVE = "inactive"
-        
+
         class EnumDTO(EnhancedBaseModel):
             status: Status
-        
+
         dto = EnumDTO(status=Status.ACTIVE)
         assert dto.model_dump()["status"] == "active"
 
     def test_config_json_encoder_datetime(self):
         """Test that datetime is encoded correctly."""
         from datetime import datetime
-        
+
         class DateDTO(EnhancedBaseModel):
             created: datetime
-        
+
         now = datetime(2024, 1, 15, 10, 30, 0)
         dto = DateDTO(created=now)
         json_output = dto.model_dump_json()

@@ -20,22 +20,21 @@ Example:
 from abc import ABC
 from datetime import datetime
 from operator import attrgetter
-from typing import Optional, Dict, Any, List, Callable, Type, Union
+from typing import Any
 
-from cachetools import cachedmethod, LRUCache
+from cachetools import LRUCache, cachedmethod
 from loguru import logger
 from sqlalchemy import and_, or_
 from sqlalchemy.ext.declarative import DeclarativeMeta
-from sqlalchemy.orm import Query
 
 
 class FilterOperator:
     """
     Enumeration of filter operators for flexible querying.
-    
+
     Provides constants for common SQL comparison operators
     that can be used with retrieve_record_by_filter.
-    
+
     Example:
         >>> filters = [
         ...     ("age", FilterOperator.GTE, 18),
@@ -211,21 +210,21 @@ class IRepository(ABC):
     ):
         """
         Build a SQLAlchemy filter condition from field, operator, and value.
-        
+
         Args:
             field: Model attribute name.
             operator: Filter operator (from FilterOperator).
             value: Value to filter by.
-            
+
         Returns:
             SQLAlchemy filter condition.
-            
+
         Raises:
             AttributeError: If field doesn't exist on model.
             ValueError: If operator is not supported.
         """
         column = getattr(self.model, field)
-        
+
         operator_map = {
             FilterOperator.EQ: lambda c, v: c == v,
             FilterOperator.NE: lambda c, v: c != v,
@@ -241,31 +240,31 @@ class IRepository(ABC):
             FilterOperator.IS_NOT_NULL: lambda c, v: c.isnot(None),
             FilterOperator.BETWEEN: lambda c, v: c.between(v[0], v[1]),
         }
-        
+
         if operator not in operator_map:
             raise ValueError(f"Unsupported operator: {operator}")
-        
+
         return operator_map[operator](column, value)
 
     def _build_query_filters(
         self,
-        filters: Union[Dict[str, Any], List[tuple]],
+        filters: dict[str, Any] | list[tuple],
         use_or: bool = False,
     ) -> list:
         """
         Build a list of SQLAlchemy filter conditions from filters specification.
-        
+
         Supports two filter formats:
         1. Simple dict: {"field": value} - uses equality operator
         2. List of tuples: [("field", "operator", value)] - custom operators
-        
+
         Args:
             filters: Filter specification (dict or list of tuples).
             use_or: If True, combine filters with OR instead of AND.
-            
+
         Returns:
             List of SQLAlchemy filter conditions.
-            
+
         Example:
             >>> # Simple equality filters
             >>> filters = {"status": "active", "is_deleted": False}
@@ -278,7 +277,7 @@ class IRepository(ABC):
             ... ]
         """
         conditions = []
-        
+
         if isinstance(filters, dict):
             # Simple dict format: {"field": value} uses equality
             for field, value in filters.items():
@@ -297,28 +296,28 @@ class IRepository(ABC):
                     field, operator, value = filter_spec
                 else:
                     raise ValueError(f"Invalid filter specification: {filter_spec}")
-                
+
                 conditions.append(
                     self._build_filter_condition(field, operator, value)
                 )
-        
+
         return conditions
 
     def retrieve_record_by_filter(
         self,
-        filters: Union[Dict[str, Any], List[tuple]] = None,
+        filters: dict[str, Any] | list[tuple] = None,
         use_or: bool = False,
-        order_by: Union[str, List[str]] = None,
+        order_by: str | list[str] = None,
         order_desc: bool = False,
         include_deleted: bool = False,
-    ) -> Optional[DeclarativeMeta]:
+    ) -> DeclarativeMeta | None:
         """
         Retrieve a single record matching the filter criteria.
-        
+
         This is the core flexible filtering method that can be used
         to build any kind of query. It supports simple equality filters
         via dict, or complex filters with operators via list of tuples.
-        
+
         Args:
             filters: Filter criteria. Can be:
                 - Dict[str, Any]: Simple equality filters {"field": value}
@@ -327,10 +326,10 @@ class IRepository(ABC):
             order_by: Field(s) to order by before selecting first.
             order_desc: If True, order descending. Default ascending.
             include_deleted: If True, include soft-deleted records.
-            
+
         Returns:
             The first matching record, or None if not found.
-            
+
         Example:
             >>> # Simple filter
             >>> user = repo.retrieve_record_by_filter({"email": "user@example.com"})
@@ -355,13 +354,13 @@ class IRepository(ABC):
             ... ], use_or=True)
         """
         start_time = datetime.now()
-        
+
         query = self.session.query(self.model)
-        
+
         # Apply soft-delete filter unless explicitly including deleted
         if not include_deleted and hasattr(self.model, 'is_deleted'):
-            query = query.filter(self.model.is_deleted == False)
-        
+            query = query.filter(not self.model.is_deleted)
+
         # Apply custom filters
         if filters:
             conditions = self._build_query_filters(filters, use_or)
@@ -370,7 +369,7 @@ class IRepository(ABC):
                     query = query.filter(or_(*conditions))
                 else:
                     query = query.filter(and_(*conditions))
-        
+
         # Apply ordering
         if order_by:
             if isinstance(order_by, str):
@@ -378,9 +377,9 @@ class IRepository(ABC):
             for field in order_by:
                 column = getattr(self.model, field)
                 query = query.order_by(column.desc() if order_desc else column.asc())
-        
+
         record = query.first()
-        
+
         end_time = datetime.now()
         execution_time = end_time - start_time
         self.logger.debug(
@@ -388,25 +387,25 @@ class IRepository(ABC):
             filters=str(filters),
             found=record is not None,
         )
-        
+
         return record
 
     def retrieve_records_by_filter(
         self,
-        filters: Union[Dict[str, Any], List[tuple]] = None,
+        filters: dict[str, Any] | list[tuple] = None,
         use_or: bool = False,
-        order_by: Union[str, List[str]] = None,
+        order_by: str | list[str] = None,
         order_desc: bool = False,
         limit: int = None,
         offset: int = None,
         include_deleted: bool = False,
-    ) -> List[DeclarativeMeta]:
+    ) -> list[DeclarativeMeta]:
         """
         Retrieve multiple records matching the filter criteria.
-        
+
         Similar to retrieve_record_by_filter but returns all matching
         records with optional pagination support.
-        
+
         Args:
             filters: Filter criteria (dict or list of tuples).
             use_or: If True, combine filters with OR. Default is AND.
@@ -415,10 +414,10 @@ class IRepository(ABC):
             limit: Maximum number of records to return.
             offset: Number of records to skip (for pagination).
             include_deleted: If True, include soft-deleted records.
-            
+
         Returns:
             List of matching records (empty list if none found).
-            
+
         Example:
             >>> # Get all active products in a category
             >>> products = repo.retrieve_records_by_filter(
@@ -441,13 +440,13 @@ class IRepository(ABC):
             ... )
         """
         start_time = datetime.now()
-        
+
         query = self.session.query(self.model)
-        
+
         # Apply soft-delete filter unless explicitly including deleted
         if not include_deleted and hasattr(self.model, 'is_deleted'):
-            query = query.filter(self.model.is_deleted == False)
-        
+            query = query.filter(not self.model.is_deleted)
+
         # Apply custom filters
         if filters:
             conditions = self._build_query_filters(filters, use_or)
@@ -456,7 +455,7 @@ class IRepository(ABC):
                     query = query.filter(or_(*conditions))
                 else:
                     query = query.filter(and_(*conditions))
-        
+
         # Apply ordering
         if order_by:
             if isinstance(order_by, str):
@@ -464,15 +463,15 @@ class IRepository(ABC):
             for field in order_by:
                 column = getattr(self.model, field)
                 query = query.order_by(column.desc() if order_desc else column.asc())
-        
+
         # Apply pagination
         if offset is not None:
             query = query.offset(offset)
         if limit is not None:
             query = query.limit(limit)
-        
+
         records = query.all()
-        
+
         end_time = datetime.now()
         execution_time = end_time - start_time
         self.logger.debug(
@@ -480,26 +479,26 @@ class IRepository(ABC):
             filters=str(filters),
             count=len(records),
         )
-        
+
         return records
 
     def count_by_filter(
         self,
-        filters: Union[Dict[str, Any], List[tuple]] = None,
+        filters: dict[str, Any] | list[tuple] = None,
         use_or: bool = False,
         include_deleted: bool = False,
     ) -> int:
         """
         Count records matching the filter criteria.
-        
+
         Args:
             filters: Filter criteria (dict or list of tuples).
             use_or: If True, combine filters with OR. Default is AND.
             include_deleted: If True, include soft-deleted records.
-            
+
         Returns:
             Number of matching records.
-            
+
         Example:
             >>> active_count = repo.count_by_filter({"is_active": True})
             >>> recent_orders = repo.count_by_filter([
@@ -507,12 +506,12 @@ class IRepository(ABC):
             ... ])
         """
         start_time = datetime.now()
-        
+
         query = self.session.query(self.model)
-        
+
         if not include_deleted and hasattr(self.model, 'is_deleted'):
-            query = query.filter(self.model.is_deleted == False)
-        
+            query = query.filter(not self.model.is_deleted)
+
         if filters:
             conditions = self._build_query_filters(filters, use_or)
             if conditions:
@@ -520,9 +519,9 @@ class IRepository(ABC):
                     query = query.filter(or_(*conditions))
                 else:
                     query = query.filter(and_(*conditions))
-        
+
         count = query.count()
-        
+
         end_time = datetime.now()
         execution_time = end_time - start_time
         self.logger.debug(
@@ -530,29 +529,29 @@ class IRepository(ABC):
             filters=str(filters),
             count=count,
         )
-        
+
         return count
 
     def exists_by_filter(
         self,
-        filters: Union[Dict[str, Any], List[tuple]] = None,
+        filters: dict[str, Any] | list[tuple] = None,
         use_or: bool = False,
         include_deleted: bool = False,
     ) -> bool:
         """
         Check if any record exists matching the filter criteria.
-        
+
         More efficient than count_by_filter when you just need to
         know if a record exists.
-        
+
         Args:
             filters: Filter criteria (dict or list of tuples).
             use_or: If True, combine filters with OR. Default is AND.
             include_deleted: If True, include soft-deleted records.
-            
+
         Returns:
             True if at least one record matches, False otherwise.
-            
+
         Example:
             >>> if repo.exists_by_filter({"email": email}):
             ...     raise ValueError("Email already registered")
@@ -603,7 +602,7 @@ class IRepository(ABC):
         self,
         id: str,
         is_deleted: bool = False
-    ) -> Optional[DeclarativeMeta]:
+    ) -> DeclarativeMeta | None:
         """
         Retrieve a record by its primary key ID.
 
@@ -633,7 +632,7 @@ class IRepository(ABC):
         self,
         urn: str,
         is_deleted: bool = False,
-    ) -> Optional[DeclarativeMeta]:
+    ) -> DeclarativeMeta | None:
         """
         Retrieve a record by its Unique Resource Name (URN).
 
@@ -661,7 +660,7 @@ class IRepository(ABC):
     def update_record(
         self,
         id: str,
-        new_data: Dict[str, Any],
+        new_data: dict[str, Any],
     ) -> DeclarativeMeta:
         """
         Update an existing record with new data.
@@ -707,23 +706,23 @@ class IRepository(ABC):
 
     def update_record_by_filter(
         self,
-        filters: Union[Dict[str, Any], List[tuple]],
-        new_data: Dict[str, Any],
+        filters: dict[str, Any] | list[tuple],
+        new_data: dict[str, Any],
         use_or: bool = False,
-    ) -> Optional[DeclarativeMeta]:
+    ) -> DeclarativeMeta | None:
         """
         Update a record matching the filter criteria.
-        
+
         Finds the first record matching the filters and updates it.
-        
+
         Args:
             filters: Filter criteria to find the record.
             new_data: Dictionary of attribute names to new values.
             use_or: If True, combine filters with OR.
-            
+
         Returns:
             The updated record, or None if not found.
-            
+
         Example:
             >>> repo.update_record_by_filter(
             ...     filters={"email": "old@example.com"},
@@ -752,26 +751,26 @@ class IRepository(ABC):
 
     def delete_record_by_filter(
         self,
-        filters: Union[Dict[str, Any], List[tuple]],
+        filters: dict[str, Any] | list[tuple],
         use_or: bool = False,
         hard_delete: bool = False,
         deleted_by: Any = None,
     ) -> bool:
         """
         Delete a record matching the filter criteria.
-        
+
         By default performs a soft delete (sets is_deleted=True).
         Use hard_delete=True for permanent deletion.
-        
+
         Args:
             filters: Filter criteria to find the record.
             use_or: If True, combine filters with OR.
             hard_delete: If True, permanently delete the record.
             deleted_by: User ID performing the deletion (for audit).
-            
+
         Returns:
             True if a record was deleted, False if not found.
-            
+
         Example:
             >>> # Soft delete
             >>> repo.delete_record_by_filter(

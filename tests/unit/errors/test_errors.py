@@ -2,8 +2,10 @@
 Tests for custom error classes.
 """
 
-import pytest
 from http import HTTPStatus
+
+import pytest
+
 from errors.bad_input_error import BadInputError
 from errors.not_found_error import NotFoundError
 from errors.unexpected_response_error import UnexpectedResponseError

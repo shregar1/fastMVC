@@ -2,10 +2,11 @@
 Tests for user services (login, logout, registration).
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 from datetime import datetime
 from http import HTTPStatus
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Mock bcrypt before importing services
 with patch.dict('sys.modules', {'bcrypt': MagicMock()}):
@@ -13,9 +14,9 @@ with patch.dict('sys.modules', {'bcrypt': MagicMock()}):
     from services.user.logout import UserLogoutService
     from services.user.registration import UserRegistrationService
 
+from constants.api_status import APIStatus
 from errors.bad_input_error import BadInputError
 from errors.not_found_error import NotFoundError
-from constants.api_status import APIStatus
 
 
 class TestUserLoginService:
@@ -70,13 +71,13 @@ class TestUserLoginService:
         """Test service properties."""
         service.urn = "new-urn"
         assert service.urn == "new-urn"
-        
+
         service.user_urn = "new-user-urn"
         assert service.user_urn == "new-user-urn"
-        
+
         service.api_name = "new-api"
         assert service.api_name == "new-api"
-        
+
         service.user_id = 2
         assert service.user_id == 2
 
@@ -88,13 +89,13 @@ class TestUserLoginService:
         mock_bcrypt.checkpw.return_value = True
         mock_user_repository.retrieve_record_by_email.return_value = mock_user
         mock_user_repository.update_record.return_value = mock_user
-        
+
         request = MagicMock()
         request.email = "test@example.com"
         request.password = "SecureP@ss123"
-        
+
         result = await service.run(request)
-        
+
         assert result.status == APIStatus.SUCCESS
         assert result.responseKey == "success_user_login"
         assert "token" in result.data
@@ -103,11 +104,11 @@ class TestUserLoginService:
     async def test_run_user_not_found(self, service, mock_user_repository):
         """Test login with non-existent user."""
         mock_user_repository.retrieve_record_by_email.return_value = None
-        
+
         request = MagicMock()
         request.email = "nonexistent@example.com"
         request.password = "SecureP@ss123"
-        
+
         with pytest.raises(NotFoundError) as exc_info:
             await service.run(request)
         assert exc_info.value.httpStatusCode == HTTPStatus.NOT_FOUND
@@ -118,11 +119,11 @@ class TestUserLoginService:
         """Test login with wrong password."""
         mock_bcrypt.checkpw.return_value = False
         mock_user_repository.retrieve_record_by_email.return_value = mock_user
-        
+
         request = MagicMock()
         request.email = "test@example.com"
         request.password = "WrongP@ss123"
-        
+
         with pytest.raises(BadInputError) as exc_info:
             await service.run(request)
         assert exc_info.value.httpStatusCode == HTTPStatus.BAD_REQUEST
@@ -175,9 +176,9 @@ class TestUserLogoutService:
         mock_user_repository.retrieve_record_by_id_is_logged_in.return_value = mock_user
         mock_user.is_logged_in = False
         mock_user_repository.update_record.return_value = mock_user
-        
+
         result = await service.run()
-        
+
         assert result.status == APIStatus.SUCCESS
         assert result.responseKey == "success_user_logout"
 
@@ -185,7 +186,7 @@ class TestUserLogoutService:
     async def test_run_user_not_logged_in(self, service, mock_user_repository):
         """Test logout when user not logged in."""
         mock_user_repository.retrieve_record_by_id_is_logged_in.return_value = None
-        
+
         with pytest.raises(BadInputError) as exc_info:
             await service.run()
         assert exc_info.value.httpStatusCode == HTTPStatus.BAD_REQUEST
@@ -225,18 +226,18 @@ class TestUserRegistrationService:
         mock_ulid.ulid.return_value = "01ARZ3NDEKTSV4RRFFQ69G5FAV"
         mock_bcrypt.hashpw.return_value = b"hashed_password"
         mock_user_repository.retrieve_record_by_email.return_value = None
-        
+
         created_user = MagicMock()
         created_user.email = "newuser@example.com"
         created_user.created_on = datetime.now()
         mock_user_repository.create_record.return_value = created_user
-        
+
         request = MagicMock()
         request.email = "newuser@example.com"
         request.password = "SecureP@ss123"
-        
+
         result = await service.run(request)
-        
+
         assert result.status == APIStatus.SUCCESS
         assert result.responseKey == "success_user_register"
 
@@ -245,11 +246,11 @@ class TestUserRegistrationService:
         """Test registration with existing email."""
         existing_user = MagicMock()
         mock_user_repository.retrieve_record_by_email.return_value = existing_user
-        
+
         request = MagicMock()
         request.email = "existing@example.com"
         request.password = "SecureP@ss123"
-        
+
         with pytest.raises(BadInputError) as exc_info:
             await service.run(request)
         assert "already registered" in exc_info.value.responseMessage

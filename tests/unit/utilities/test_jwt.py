@@ -2,10 +2,12 @@
 Tests for JWTUtility class.
 """
 
-import pytest
-import jwt
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
+import jwt
+import pytest
+
 from utilities.jwt import JWTUtility
 
 
@@ -77,7 +79,7 @@ class TestJWTUtility:
         """Test creating access token with basic payload."""
         payload = {"user_id": 1, "email": "test@example.com"}
         token = utility.create_access_token(payload)
-        
+
         assert token is not None
         assert isinstance(token, str)
         assert len(token) > 0
@@ -89,7 +91,7 @@ class TestJWTUtility:
         """Test that token includes expiration."""
         payload = {"user_id": 1}
         token = utility.create_access_token(payload)
-        
+
         decoded = jwt.decode(token, 'test-secret-key', algorithms=['HS256'])
         assert "exp" in decoded
         assert "user_id" in decoded
@@ -101,7 +103,7 @@ class TestJWTUtility:
         """Test token with default expiry when not configured."""
         payload = {"user_id": 1}
         token = utility.create_access_token(payload)
-        
+
         decoded = jwt.decode(token, 'test-secret-key', algorithms=['HS256'])
         assert "exp" in decoded
 
@@ -112,7 +114,7 @@ class TestJWTUtility:
         """Test that original payload data is preserved."""
         payload = {"user_id": 1, "email": "test@example.com", "role": "admin"}
         token = utility.create_access_token(payload)
-        
+
         decoded = jwt.decode(token, 'test-secret-key', algorithms=['HS256'])
         assert decoded["user_id"] == 1
         assert decoded["email"] == "test@example.com"
@@ -125,7 +127,7 @@ class TestJWTUtility:
         """Test decoding valid token."""
         payload = {"user_id": 1, "exp": datetime.now() + timedelta(hours=1)}
         token = jwt.encode(payload, 'test-secret-key', algorithm='HS256')
-        
+
         decoded = utility.decode_token(token)
         assert decoded["user_id"] == 1
 
@@ -134,10 +136,10 @@ class TestJWTUtility:
         # This test verifies the decode_token method handles expired tokens
         # The actual behavior depends on PyJWT's verification settings
         # We test that the method accepts and processes a token
-        from utilities.jwt import SECRET_KEY, ALGORITHM
+        from utilities.jwt import ALGORITHM, SECRET_KEY
         payload = {"user_id": 1, "exp": datetime.now() - timedelta(hours=1)}
         token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
-        
+
         # Depending on JWT library settings, this may or may not raise
         # We just verify the method can be called
         try:
@@ -157,7 +159,7 @@ class TestJWTUtility:
         """Test decoding token with invalid signature."""
         payload = {"user_id": 1, "exp": datetime.now() + timedelta(hours=1)}
         token = jwt.encode(payload, 'wrong-secret', algorithm='HS256')
-        
+
         with pytest.raises(jwt.PyJWTError):
             utility.decode_token(token)
 
@@ -178,10 +180,10 @@ class TestJWTUtility:
             "user_urn": "test-urn",
             "email": "test@example.com"
         }
-        
+
         token = utility.create_access_token(original_payload)
         decoded = utility.decode_token(token)
-        
+
         assert decoded["user_id"] == original_payload["user_id"]
         assert decoded["user_urn"] == original_payload["user_urn"]
         assert decoded["email"] == original_payload["email"]

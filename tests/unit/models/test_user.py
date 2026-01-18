@@ -2,10 +2,8 @@
 Tests for User model.
 """
 
-import pytest
-from datetime import datetime
-from models.user import User
 from constants.db.table import Table
+from models.user import User
 
 
 class TestUserModel:
@@ -91,7 +89,7 @@ class TestUserModel:
     def test_indexes_exist(self):
         """Test indexes are defined on User table."""
         indexes = list(User.__table__.indexes)
-        index_names = [idx.name for idx in indexes]
+        [idx.name for idx in indexes]
         # The indexes are defined, check that some exist
         assert len(indexes) >= 0  # Basic check that indexes property exists
 
