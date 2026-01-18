@@ -31,8 +31,6 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from http import HTTPStatus
 from loguru import logger
@@ -40,22 +38,31 @@ from loguru import logger
 from constants.default import Default
 from controllers.user import router as UserRouter
 
-from middlewares.authetication import AuthenticationMiddleware
-from middlewares.rate_limit import (
-    RateLimitMiddleware, RateLimitConfig
-)
-from middlewares.security_headers import (
+# Import middlewares from fastmvc-middleware package
+from FastMiddleware import (
+    # Security
     SecurityHeadersMiddleware,
-    SecurityHeadersConfig
+    SecurityHeadersConfig,
+    TrustedHostMiddleware,
+    CORSMiddleware,
+    # Rate Limiting
+    RateLimitMiddleware,
+    RateLimitConfig,
+    # Request Context & Tracking
+    RequestContextMiddleware,
+    TimingMiddleware,
+    LoggingMiddleware,
 )
-from middlewares.request_context import RequestContextMiddleware
+
+# Custom authentication middleware (app-specific with user repository)
+from middlewares.authetication import AuthenticationMiddleware
 
 
 # Initialize FastAPI application
 app = FastAPI(
     title="FastMVC API",
     description="Production-grade FastAPI application with MVC architecture",
-    version="1.0.0",
+    version="1.0.1",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -150,51 +157,70 @@ async def health_check():
 
 
 # =============================================================================
-# MIDDLEWARE CONFIGURATION
+# MIDDLEWARE CONFIGURATION (using fastmvc-middleware package)
 # =============================================================================
 
+logger.info("Initializing middleware stack with FastMiddleware")
+
 # Trusted Host Middleware - Prevents host header attacks
-app.add_middleware(middleware_class=TrustedHostMiddleware, allowed_hosts=["*"])
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 
 # CORS Middleware - Cross-Origin Resource Sharing
-origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["X-Request-ID", "X-Process-Time"],
 )
-
-# Custom Middleware Stack (order matters - last added = first executed)
-logger.info("Initializing middleware stack")
 
 # Security Headers Middleware - CSP, HSTS, X-Frame-Options, etc.
 security_config = SecurityHeadersConfig(
     enable_hsts=True,
-    enable_csp=True,
     hsts_max_age=31536000,
-    hsts_include_subdomains=True
+    hsts_include_subdomains=True,
+    hsts_preload=False,
+    x_frame_options="DENY",
+    x_content_type_options="nosniff",
+    x_xss_protection="1; mode=block",
+    referrer_policy="strict-origin-when-cross-origin",
+    content_security_policy="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+    remove_server_header=True,
 )
-app.add_middleware(SecurityHeadersMiddleware, **security_config.__dict__)
+app.add_middleware(SecurityHeadersMiddleware, config=security_config)
 
 # Rate Limiting Middleware - Protects against abuse
 rate_limit_config = RateLimitConfig(
     requests_per_minute=RATE_LIMIT_REQUESTS_PER_MINUTE,
     requests_per_hour=RATE_LIMIT_REQUESTS_PER_HOUR,
     burst_limit=RATE_LIMIT_BURST_LIMIT,
-    enable_sliding_window=True,
-    enable_token_bucket=False
+    window_size=RATE_LIMIT_WINDOW_SECONDS,
+    strategy="sliding",  # Use sliding window algorithm
 )
 app.add_middleware(RateLimitMiddleware, config=rate_limit_config)
 
-# Authentication Middleware - JWT validation
+# Logging Middleware - Request/Response logging
+app.add_middleware(
+    LoggingMiddleware,
+    log_request_body=False,  # Don't log sensitive request bodies
+    log_response_body=False,
+    exclude_paths={"/health", "/docs", "/redoc", "/openapi.json"},
+)
+
+# Timing Middleware - Response time tracking
+app.add_middleware(
+    TimingMiddleware,
+    header_name="X-Process-Time",
+)
+
+# Authentication Middleware - JWT validation (custom, app-specific)
 app.add_middleware(AuthenticationMiddleware)
 
-# Request Context Middleware - URN generation and timing (must be first)
+# Request Context Middleware - URN generation and request tracking (must be first)
 app.add_middleware(RequestContextMiddleware)
 
-logger.info("Initialized middleware stack")
+logger.info("Initialized middleware stack with FastMiddleware")
 
 # =============================================================================
 # ROUTER CONFIGURATION
@@ -222,6 +248,7 @@ async def on_startup():
     """
     logger.info("Application startup event triggered")
     logger.info(f"FastMVC API starting on {HOST}:{PORT}")
+    logger.info("Using fastmvc-middleware for request processing")
 
 
 @app.on_event("shutdown")

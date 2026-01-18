@@ -2,16 +2,27 @@
 
 ## Overview
 
-The `middlewares` module provides FastAPI middleware components that process all HTTP requests and responses. Middlewares add cross-cutting concerns like authentication, rate limiting, security headers, and request context.
+FastMVC leverages the **[fastmvc-middleware](https://pypi.org/project/fastmvc-middleware/)** package - a comprehensive collection of **90+ production-ready middleware components** for FastAPI/Starlette applications.
 
-## Purpose
+This directory also contains app-specific middlewares (like custom JWT authentication) that integrate with your application's user repository and business logic.
 
-**Middleware** in FastAPI/Starlette:
+## 🚀 Quick Start
 
-- Intercepts every request before it reaches route handlers
-- Can modify requests and responses
-- Implements cross-cutting concerns uniformly
-- Executes in a defined order (first added = outermost)
+```python
+from FastMiddleware import (
+    SecurityHeadersMiddleware,
+    RateLimitMiddleware,
+    RequestContextMiddleware,
+    TimingMiddleware,
+    LoggingMiddleware,
+    CORSMiddleware,
+)
+
+# Add to your FastAPI app
+app.add_middleware(SecurityHeadersMiddleware, config=security_config)
+app.add_middleware(RateLimitMiddleware, config=rate_limit_config)
+app.add_middleware(RequestContextMiddleware)
+```
 
 ## Architecture
 
@@ -24,6 +35,12 @@ The `middlewares` module provides FastAPI middleware components that process all
 ┌─────────────────────────────────────────────────────────────┐
 │               RequestContextMiddleware                       │
 │              (Add URN, timestamp)                            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 TimingMiddleware                             │
+│           (Track response time)                              │
 └─────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -50,33 +67,75 @@ The `middlewares` module provides FastAPI middleware components that process all
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Components
+## 📦 FastMiddleware Package Components
 
-### RequestContextMiddleware (`request_context.py`)
+### Categories Available (90+ Middlewares)
 
-Generates unique request identifier (URN) and tracks timing.
+| Category | Examples |
+|----------|----------|
+| **Core** | CORS, Logging, Timing, Request ID |
+| **Security** | SecurityHeaders, CSRF, HTTPS Redirect, IP Filter, Honeypot, Sanitization |
+| **Rate Limiting** | RateLimit, Quota, Load Shedding, Bulkhead, Request Dedup |
+| **Authentication** | JWT Auth, API Key, Basic Auth, Bearer Auth, Route Auth |
+| **Session & Context** | Session, Request Context, Correlation, Tenant, Context |
+| **Caching** | Response Cache, ETag, Conditional Request, No Cache |
+| **Resilience** | Circuit Breaker, Timeout, Graceful Shutdown, Retry After |
+| **Observability** | Metrics, Profiling, Server Timing, Request Logger |
+| **Content** | Compression, Content Negotiation, JSON Schema, Payload Size |
+| **Routing** | Path Rewrite, Redirect, Trailing Slash, Method Override |
+
+### Usage Example
 
 ```python
-from middlewares.request_context import RequestContextMiddleware
+from FastMiddleware import (
+    # Security
+    SecurityHeadersMiddleware,
+    SecurityHeadersConfig,
+    CSRFMiddleware,
+    IPFilterMiddleware,
+    
+    # Rate Limiting
+    RateLimitMiddleware,
+    RateLimitConfig,
+    
+    # Authentication
+    AuthenticationMiddleware,
+    JWTAuthBackend,
+    
+    # Observability
+    LoggingMiddleware,
+    TimingMiddleware,
+    MetricsMiddleware,
+    
+    # Context
+    RequestContextMiddleware,
+    CorrelationMiddleware,
+)
 
-app.add_middleware(RequestContextMiddleware)
+# Configure and add middlewares
+security_config = SecurityHeadersConfig(
+    enable_hsts=True,
+    hsts_max_age=31536000,
+    x_frame_options="DENY",
+    content_security_policy="default-src 'self'",
+)
+app.add_middleware(SecurityHeadersMiddleware, config=security_config)
+
+rate_config = RateLimitConfig(
+    requests_per_minute=60,
+    requests_per_hour=1000,
+    strategy="sliding",
+)
+app.add_middleware(RateLimitMiddleware, config=rate_config)
 ```
 
-**Features:**
-- Generates ULID-based URN for each request
-- Adds `request.state.urn` for downstream access
-- Tracks request start time
-- Adds `X-Process-Time` and `X-Request-URN` response headers
+## 🏠 Local Middlewares
 
-**Response Headers:**
-```
-X-Process-Time: 0:00:00.045123
-X-Request-URN: 01ARZ3NDEKTSV4RRFFQ69G5FAV
-```
+This directory contains app-specific middlewares that require application logic:
 
 ### AuthenticationMiddleware (`authetication.py`)
 
-Validates JWT tokens and enforces authentication on protected routes.
+Custom JWT authentication that integrates with your user repository.
 
 ```python
 from middlewares.authetication import AuthenticationMiddleware
@@ -101,9 +160,25 @@ app.add_middleware(AuthenticationMiddleware)
 }
 ```
 
+### RequestContextMiddleware (`request_context.py`)
+
+Local implementation for request tracking (can use FastMiddleware version instead).
+
+```python
+from middlewares.request_context import RequestContextMiddleware
+
+app.add_middleware(RequestContextMiddleware)
+```
+
+**Features:**
+- Generates ULID-based URN for each request
+- Adds `request.state.urn` for downstream access
+- Tracks request start time
+- Adds `X-Process-Time` and `X-Request-URN` response headers
+
 ### RateLimitMiddleware (`rate_limit.py`)
 
-Protects against abuse with configurable rate limiting.
+Local rate limiting implementation (can use FastMiddleware version instead).
 
 ```python
 from middlewares.rate_limit import RateLimitMiddleware, RateLimitConfig
@@ -117,38 +192,9 @@ config = RateLimitConfig(
 app.add_middleware(RateLimitMiddleware, config=config)
 ```
 
-**Features:**
-- Sliding window rate limiting algorithm
-- Per-client tracking via IP address
-- Configurable limits per minute/hour
-- Automatic cleanup of old entries
-- Rate limit headers in responses
-
-**Response Headers:**
-```
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1609459200
-Retry-After: 60
-```
-
-**Rate Limit Error (429):**
-```json
-{
-    "transactionUrn": "...",
-    "status": "FAILED",
-    "responseMessage": "Rate limit exceeded. Please try again later.",
-    "responseKey": "error_rate_limit_exceeded",
-    "data": {
-        "exceeded_limits": ["sliding_minute"],
-        "retry_after": 60
-    }
-}
-```
-
 ### SecurityHeadersMiddleware (`security_headers.py`)
 
-Adds security headers to all responses for browser protection.
+Local security headers implementation (can use FastMiddleware version instead).
 
 ```python
 from middlewares.security_headers import SecurityHeadersMiddleware
@@ -160,67 +206,44 @@ app.add_middleware(
 )
 ```
 
-**Headers Added:**
-| Header | Purpose |
-|--------|---------|
-| `Content-Security-Policy` | Prevent XSS and injection attacks |
-| `Strict-Transport-Security` | Force HTTPS connections |
-| `X-Frame-Options` | Prevent clickjacking (DENY) |
-| `X-Content-Type-Options` | Prevent MIME sniffing (nosniff) |
-| `X-XSS-Protection` | Legacy XSS filter |
-| `Referrer-Policy` | Control referrer information |
-| `Permissions-Policy` | Restrict browser features |
-| `X-Download-Options` | IE download protection |
-| `X-Permitted-Cross-Domain-Policies` | Flash cross-domain policy |
+## 🔧 Configuration
 
-## Middleware Order
-
-Order matters! Middlewares are added in reverse execution order:
+### SecurityHeadersConfig (FastMiddleware)
 
 ```python
-# Last added = first executed
-app.add_middleware(SecurityHeadersMiddleware)      # 4th
-app.add_middleware(AuthenticationMiddleware)        # 3rd
-app.add_middleware(RateLimitMiddleware)             # 2nd
-app.add_middleware(RequestContextMiddleware)        # 1st
+from FastMiddleware import SecurityHeadersConfig
+
+config = SecurityHeadersConfig(
+    x_content_type_options="nosniff",
+    x_frame_options="DENY",
+    x_xss_protection="1; mode=block",
+    referrer_policy="strict-origin-when-cross-origin",
+    enable_hsts=True,
+    hsts_max_age=31536000,
+    hsts_include_subdomains=True,
+    hsts_preload=False,
+    content_security_policy="default-src 'self'",
+    permissions_policy="camera=(), microphone=()",
+    remove_server_header=True,
+)
 ```
 
-**Execution Order:**
-1. RequestContextMiddleware (add URN)
-2. RateLimitMiddleware (check limits)
-3. AuthenticationMiddleware (validate token)
-4. SecurityHeadersMiddleware (add headers on response)
-
-## Configuration
-
-### RateLimitConfig
+### RateLimitConfig (FastMiddleware)
 
 ```python
-class RateLimitConfig:
-    requests_per_minute: int = 60
-    requests_per_hour: int = 1000
-    burst_limit: int = 10
-    window_size: int = 60
-    enable_sliding_window: bool = True
-    enable_token_bucket: bool = False
-    enable_fixed_window: bool = False
+from FastMiddleware import RateLimitConfig
+
+config = RateLimitConfig(
+    requests_per_minute=60,
+    requests_per_hour=1000,
+    burst_limit=10,
+    window_size=60,
+    strategy="sliding",  # or "fixed", "token_bucket"
+    key_func=None,  # Custom key function
+)
 ```
 
-### SecurityHeadersConfig
-
-```python
-class SecurityHeadersConfig:
-    enable_hsts: bool = True
-    enable_csp: bool = True
-    hsts_max_age: int = 31536000  # 1 year
-    hsts_include_subdomains: bool = True
-    frame_options: str = "DENY"
-    content_type_options: str = "nosniff"
-    xss_protection: str = "1; mode=block"
-    referrer_policy: str = "strict-origin-when-cross-origin"
-```
-
-## Protected vs Unprotected Routes
+## ⚙️ Protected vs Unprotected Routes
 
 Routes are configured in `start_utils.py`:
 
@@ -229,6 +252,7 @@ unprotected_routes = {
     "/user/login",
     "/user/register",
     "/docs",
+    "/redoc",
     "/openapi.json",
     "/health"
 }
@@ -236,22 +260,23 @@ unprotected_routes = {
 callback_routes = set()  # Webhook endpoints
 ```
 
-## Best Practices
-
-1. **Order carefully**: Request context must be first
-2. **Log appropriately**: Debug for flow, Error for failures
-3. **Handle errors gracefully**: Return proper JSON responses
-4. **Use configuration**: Don't hardcode values
-5. **Test thoroughly**: Middleware affects all requests
-
-## File Structure
+## 📁 File Structure
 
 ```
 middlewares/
 ├── __init__.py
 ├── README.md
-├── authetication.py       # JWT authentication
-├── rate_limit.py          # Rate limiting
-├── request_context.py     # Request URN and timing
-└── security_headers.py    # Security response headers
+├── authetication.py       # Custom JWT auth (app-specific)
+├── rate_limit.py          # Local rate limiting
+├── request_context.py     # Local request context
+└── security_headers.py    # Local security headers
+
+# FastMiddleware package provides 90+ additional middlewares
+# via: from FastMiddleware import ...
 ```
+
+## 🔗 Resources
+
+- [fastmvc-middleware on PyPI](https://pypi.org/project/fastmvc-middleware/)
+- [FastMiddleware Documentation](https://github.com/hyyre/fastmvc-middleware)
+- [FastAPI Middleware Guide](https://fastapi.tiangolo.com/tutorial/middleware/)

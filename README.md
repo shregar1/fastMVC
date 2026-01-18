@@ -1,300 +1,431 @@
-# FastMVC
+<div align="center">
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# 🚀 FastMVC
 
-A production-grade FastAPI framework implementing the Model-View-Controller (MVC) architectural pattern with comprehensive security, logging, and scalability features.
+### Production-Ready MVC Framework for FastAPI
 
-## ✨ Features
+[![PyPI version](https://img.shields.io/pypi/v/pyfastmvc.svg?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/pyfastmvc/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776ab.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-- **🏗️ MVC Architecture**: Clean separation of concerns with controllers, services, and repositories
-- **🔐 Security**: JWT authentication, rate limiting, security headers, input validation
-- **⚡ CLI Tool**: Generate projects and entities with `fastmvc` commands
-- **🗄️ Database**: SQLAlchemy ORM with PostgreSQL + Alembic migrations
-- **💾 Caching**: Redis integration with decorator-based caching
-- **📝 Type Safety**: Full Pydantic v2 validation and type hints
-- **📊 Logging**: Structured logging with Loguru
-- **📚 Documentation**: Auto-generated OpenAPI/Swagger docs
+**Build enterprise-grade APIs in minutes, not hours.**
 
-## 🚀 Quick Start
+[Installation](#-installation) •
+[Quick Start](#-quick-start) •
+[Features](#-features) •
+[Documentation](#-documentation) •
+[Contributing](#-contributing)
 
-### Installation
+---
+
+</div>
+
+## 🎯 Why FastMVC?
+
+| Pain Point | FastMVC Solution |
+|------------|------------------|
+| 🏗️ **Project Setup Takes Hours** | One command generates a complete project structure |
+| 📁 **Inconsistent Code Organization** | Enforced MVC pattern with clear separation of concerns |
+| 🔐 **Security is an Afterthought** | JWT, rate limiting, and security headers built-in |
+| 🗄️ **Database Migrations are Complex** | Simple `fastmvc migrate` commands |
+| ✏️ **Writing CRUD is Repetitive** | Auto-generate entities with full CRUD scaffolding |
+| 🧪 **Testing Setup is Tedious** | Pre-configured pytest with fixtures included |
+| 🛡️ **Middleware is Scattered** | [90+ production-ready middlewares](https://pypi.org/project/fastmvc-middleware/) included |
+
+---
+
+## 📦 Installation
 
 ```bash
 pip install pyfastmvc
 ```
 
-### Create a New Project
+Verify installation:
 
 ```bash
-# Generate a new FastMVC project
+fastmvc --version
+# → fastmvc, version 1.0.1
+```
+
+---
+
+## ⚡ Quick Start
+
+### 1️⃣ Create a New Project
+
+```bash
 fastmvc generate my_api
+```
 
-# Navigate to project
+### 2️⃣ Setup & Run
+
+```bash
 cd my_api
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Configure environment
 cp .env.example .env
-
-# Start infrastructure (PostgreSQL + Redis)
-docker-compose up -d
-
-# Run database migrations
-fastmvc migrate upgrade
-
-# Start the server
+docker-compose up -d          # Start PostgreSQL + Redis
+fastmvc migrate upgrade       # Run migrations
 python -m uvicorn app:app --reload
 ```
 
-Your API is now running at http://localhost:8000 with docs at http://localhost:8000/docs 🎉
+### 3️⃣ Done! 🎉
+
+Your API is running at:
+- **API:** http://localhost:8000
+- **Docs:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+
+---
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🏗️ MVC Architecture
+Clean separation with Controllers, Services, and Repositories
+
+```python
+# controllers/user/login.py
+class UserLoginController(IController):
+    async def post(self, request: LoginDTO):
+        return await self.service.run(request)
+```
+
+</td>
+<td width="50%">
+
+### ⚡ CLI Scaffolding
+Generate complete CRUD in seconds
+
+```bash
+fastmvc add entity Product
+# Creates: model, repo, service,
+# controller, DTOs, and tests!
+```
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🔐 Security Built-In
+JWT auth, rate limiting, security headers
+
+```python
+# Automatic JWT protection
+@router.post("/protected")
+async def secure_endpoint(
+    user: User = Depends(get_current_user)
+):
+    return {"user": user.email}
+```
+
+</td>
+<td width="50%">
+
+### 💾 Smart Caching
+Redis caching with decorators
+
+```python
+@cache.cached(ttl=300, prefix="user")
+async def get_user(user_id: int):
+    return await db.fetch_user(user_id)
+```
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🗄️ Easy Migrations
+Alembic migrations simplified
+
+```bash
+fastmvc migrate generate "add products"
+fastmvc migrate upgrade
+fastmvc migrate status
+```
+
+</td>
+<td width="50%">
+
+### 📝 Type Safety
+Full Pydantic v2 validation
+
+```python
+class UserDTO(BaseRequestDTO):
+    email: EmailStr
+    password: str = Field(min_length=8)
+```
+
+</td>
+</tr>
+</table>
+
+---
 
 ## 🛠️ CLI Commands
 
-### Project Generation
+### Project Management
 
 ```bash
-# Create new project
+# Create a new project
 fastmvc generate my_project
 
-# With options
-fastmvc generate my_project --output-dir ~/projects --git --venv --install
+# With all options
+fastmvc generate my_project \
+    --output-dir ~/projects \
+    --git \      # Initialize git repo
+    --venv \     # Create virtual environment
+    --install    # Install dependencies
 ```
 
-### Entity Generation (CRUD Scaffolding)
+### Entity Generation
 
 ```bash
 # Generate complete CRUD for an entity
-cd my_project
 fastmvc add entity Product
+```
 
-# This creates:
-# - models/product.py
-# - repositories/product.py
-# - services/product/
-# - controllers/product/
-# - dtos/requests/product/
-# - tests/unit/models/test_product.py
+This creates:
+```
+📁 Generated Files:
+├── models/product.py           # SQLAlchemy model
+├── repositories/product.py     # Data access layer
+├── services/product/           # Business logic
+│   ├── abstraction.py
+│   └── crud.py
+├── controllers/product/        # API endpoints
+├── dtos/requests/product/      # Request DTOs
+│   ├── create.py
+│   └── update.py
+└── tests/unit/.../test_product.py
 ```
 
 ### Database Migrations
 
 ```bash
-# Generate migration from model changes
-fastmvc migrate generate "add product table"
-
-# Apply all pending migrations
-fastmvc migrate upgrade
-
-# Rollback last migration
-fastmvc migrate downgrade
-
-# Show migration status
-fastmvc migrate status
-
-# Show migration history
-fastmvc migrate history
+fastmvc migrate generate "add product table"  # Create migration
+fastmvc migrate upgrade                        # Apply migrations
+fastmvc migrate downgrade                      # Rollback one step
+fastmvc migrate status                         # Show current status
+fastmvc migrate history                        # Show all migrations
 ```
 
-### Other Commands
-
-```bash
-# Show framework info
-fastmvc info
-
-# Show version
-fastmvc version
-```
+---
 
 ## 📁 Project Structure
 
 ```
-my_project/
-├── abstractions/       # Base interfaces & contracts
-│   ├── controller.py   # IController base class
-│   ├── service.py      # IService base class
-│   ├── repository.py   # IRepository base class
-│   └── ...
+my_api/
+├── 🎯 app.py                 # FastAPI entry point
+├── ⚙️ start_utils.py         # Startup configuration
 │
-├── config/             # JSON configuration files
-│   ├── db/            # Database configuration
-│   ├── cache/         # Redis configuration
-│   └── security/      # Security configuration
+├── 📋 abstractions/          # Base classes & interfaces
+│   ├── controller.py         # IController
+│   ├── service.py            # IService
+│   └── repository.py         # IRepository with filters
 │
-├── configurations/     # Configuration loaders
-│
-├── constants/          # Application constants
-│
-├── controllers/        # HTTP request handlers (routes)
-│   └── user/          # User endpoints
+├── 🎮 controllers/           # HTTP route handlers
+│   └── user/
 │       ├── login.py
 │       ├── logout.py
 │       └── register.py
 │
-├── dependencies/       # FastAPI dependency injection
+├── 🔧 services/              # Business logic layer
+│   └── user/
+│       ├── login.py
+│       └── registration.py
 │
-├── dtos/              # Data Transfer Objects
-│   ├── base.py        # Enhanced base model with validation
-│   ├── requests/      # Request DTOs
-│   └── responses/     # Response DTOs
+├── 🗄️ repositories/          # Data access layer
+│   └── user.py
 │
-├── errors/            # Custom exception classes
+├── 📊 models/                # SQLAlchemy ORM models
+│   └── user.py
 │
-├── middlewares/       # Request/response middleware
-│   ├── authentication.py  # JWT authentication
-│   ├── rate_limit.py      # Rate limiting
-│   ├── request_context.py # Request tracking
-│   └── security_headers.py # Security headers
+├── 📨 dtos/                  # Data Transfer Objects
+│   ├── requests/             # Input validation
+│   └── responses/            # Output formatting
 │
-├── migrations/        # Alembic database migrations
-│   ├── env.py
+├── 🛡️ middlewares/           # Request processing
+│   ├── authentication.py     # JWT validation
+│   ├── rate_limit.py         # Rate limiting
+│   └── security_headers.py   # Security headers
+│
+├── 🔄 migrations/            # Alembic migrations
 │   └── versions/
 │
-├── models/            # SQLAlchemy ORM models
+├── 🧪 tests/                 # Test suite
+│   └── unit/
 │
-├── repositories/      # Data access layer
-│
-├── services/          # Business logic layer
-│
-├── tests/             # Test suite
-│
-├── utilities/         # Helper utilities
-│   ├── cache.py       # Redis caching with decorators
-│   ├── dictionary.py  # Dict manipulation
-│   ├── jwt.py         # JWT operations
-│   └── validation.py  # Input validation
-│
-├── app.py             # FastAPI application entry
-├── start_utils.py     # Startup configuration
-├── alembic.ini        # Alembic configuration
-├── docker-compose.yml # Docker services
-└── requirements.txt   # Dependencies
+└── 🐳 docker-compose.yml     # PostgreSQL + Redis
 ```
 
-## 🔌 API Endpoints
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/health` | Health check | No |
-| POST | `/user/register` | User registration | No |
-| POST | `/user/login` | User authentication | No |
-| POST | `/user/logout` | Session termination | Yes |
-| GET | `/docs` | Swagger UI | No |
-| GET | `/redoc` | ReDoc | No |
+---
 
 ## 🔄 Request Flow
 
 ```
-HTTP Request
-    │
-    ▼
-┌─────────────────────────────────────┐
-│         Middleware Stack            │
-│  RequestContext → RateLimit → Auth  │
-│         → SecurityHeaders           │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│           Controller                │
-│   (Validate Request → Call Service  │
-│         → Format Response)          │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│            Service                  │
-│     (Business Logic → Use Cache     │
-│          → Return DTO)              │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│           Repository                │
-│      (Database Operations)          │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                         HTTP Request                            │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  🛡️ MIDDLEWARE STACK                                            │
+│  ┌───────────┐ ┌───────────┐ ┌────────────┐ ┌────────────────┐  │
+│  │  Request  │→│   Rate    │→│    JWT     │→│   Security     │  │
+│  │  Context  │ │  Limiter  │ │    Auth    │ │   Headers      │  │
+│  └───────────┘ └───────────┘ └────────────┘ └────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  🎮 CONTROLLER                                                   │
+│  • Validate request payload                                      │
+│  • Call appropriate service                                      │
+│  • Format and return response                                    │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  🔧 SERVICE                                                      │
+│  • Execute business logic                                        │
+│  • Check cache (Redis)                                          │
+│  • Call repository for data                                      │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  🗄️ REPOSITORY                                                   │
+│  • Database operations (CRUD)                                    │
+│  • Query filtering & pagination                                  │
+│  • Result caching                                               │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## 📋 Response Format
+---
 
-All API responses follow this structure:
+## 📋 API Response Format
+
+All responses follow a consistent structure:
 
 ```json
 {
     "transactionUrn": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
     "status": "SUCCESS",
-    "responseMessage": "Operation completed successfully",
-    "responseKey": "success_operation",
-    "data": { }
+    "responseMessage": "User logged in successfully",
+    "responseKey": "success_user_login",
+    "data": {
+        "user": {
+            "id": 1,
+            "email": "user@example.com"
+        },
+        "token": "eyJhbGciOiJIUzI1NiIs..."
+    }
 }
 ```
 
-## 💾 Caching
+| Field | Description |
+|-------|-------------|
+| `transactionUrn` | Unique request identifier for tracing |
+| `status` | `SUCCESS` or `FAILED` |
+| `responseMessage` | Human-readable message |
+| `responseKey` | Machine-readable key for i18n |
+| `data` | Response payload |
 
-FastMVC includes a powerful caching utility with decorators:
+---
+
+## 🛡️ Middleware Stack
+
+FastMVC uses [**fastmvc-middleware**](https://pypi.org/project/fastmvc-middleware/) - a collection of **90+ production-ready middlewares** for FastAPI:
 
 ```python
-from utilities.cache import CacheUtility
-
-cache = CacheUtility(redis_client, default_ttl=3600)
-
-# Cache function results
-@cache.cached(ttl=300, prefix="user")
-async def get_user(user_id: int):
-    return await db.fetch_user(user_id)
-
-# Invalidate cache after modifications
-@cache.invalidate("user:*")
-async def update_user(user_id: int, data: dict):
-    return await db.update_user(user_id, data)
-
-# Manual cache operations
-cache.set("my_key", {"data": "value"}, ttl=300)
-data = cache.get("my_key")
-cache.delete("my_key")
-cache.delete_pattern("user:*")
+from FastMiddleware import (
+    SecurityHeadersMiddleware,    # CSP, HSTS, X-Frame-Options
+    RateLimitMiddleware,          # Sliding window rate limiting
+    RequestContextMiddleware,     # Request tracking & URN generation
+    TimingMiddleware,             # Response time headers
+    LoggingMiddleware,            # Structured request logging
+    CORSMiddleware,               # Cross-origin resource sharing
+    # ... and 80+ more!
+)
 ```
 
-## 🛡️ Security Features
+### Available Middleware Categories
 
-- **JWT Authentication**: Secure token-based auth with configurable expiry
-- **Password Hashing**: Bcrypt password hashing
-- **Rate Limiting**: Sliding window algorithm with configurable limits
-- **Security Headers**: CSP, HSTS, X-Frame-Options, X-Content-Type-Options
-- **Input Validation**: SQL injection, XSS, path traversal detection
-- **Request Tracing**: Unique URN for each request
+| Category | Examples |
+|----------|----------|
+| **Security** | SecurityHeaders, CSRF, HTTPS Redirect, IP Filter, Honeypot |
+| **Rate Limiting** | RateLimit, Quota, Load Shedding, Bulkhead |
+| **Authentication** | JWT Auth, API Key, Basic Auth, Bearer Auth |
+| **Caching** | Response Cache, ETag, Conditional Request |
+| **Observability** | Logging, Timing, Metrics, Correlation ID |
+| **Resilience** | Circuit Breaker, Timeout, Retry, Graceful Shutdown |
+
+---
+
+## 🔐 Security Features
+
+| Feature | Description |
+|---------|-------------|
+| 🔑 **JWT Authentication** | Secure token-based auth with configurable expiry |
+| 🔒 **Password Hashing** | Bcrypt with configurable salt rounds |
+| 🚦 **Rate Limiting** | Sliding window algorithm (per-minute & per-hour) |
+| 🛡️ **Security Headers** | CSP, HSTS, X-Frame-Options, X-Content-Type-Options |
+| 🔍 **Input Validation** | SQL injection, XSS, and path traversal detection |
+| 📍 **Request Tracing** | Unique URN for every request (debugging & monitoring) |
+
+---
 
 ## ⚙️ Configuration
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `JWT_SECRET_KEY` | JWT signing secret | Required |
-| `JWT_ALGORITHM` | JWT algorithm | HS256 |
-| `JWT_EXPIRATION_HOURS` | Token expiry | 24 |
-| `BCRYPT_SALT` | Password hashing salt | Required |
-| `DATABASE_HOST` | PostgreSQL host | localhost |
-| `DATABASE_PORT` | PostgreSQL port | 5432 |
-| `DATABASE_NAME` | Database name | fastmvc |
-| `REDIS_HOST` | Redis host | localhost |
-| `REDIS_PORT` | Redis port | 6379 |
+```bash
+# .env file
+# JWT
+JWT_SECRET_KEY=your-super-secret-key
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_HOURS=24
+
+# Database
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=fastmvc
+DATABASE_USER=postgres
+DATABASE_PASSWORD=postgres
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Security
+BCRYPT_SALT=$2b$12$...
+```
+
+---
 
 ## 🐳 Docker
 
 ```bash
-# Build and run all services
-docker-compose up -d --build
+# Start all services (PostgreSQL + Redis)
+docker-compose up -d
 
 # View logs
-docker-compose logs -f
+docker-compose logs -f fastapi
 
-# Stop services
+# Stop everything
 docker-compose down
+
+# Reset (including volumes)
+docker-compose down -v
 ```
+
+---
 
 ## 🧪 Testing
 
@@ -302,35 +433,64 @@ docker-compose down
 # Run all tests
 pytest
 
-# Run with coverage
+# With coverage report
 pytest --cov=. --cov-report=html
 
-# Run specific tests
-pytest tests/unit/services/ -v
+# Run specific test file
+pytest tests/unit/services/test_user_services.py -v
+
+# Run with verbose output
+pytest -v --tb=short
 ```
+
+---
 
 ## 📖 Documentation
 
-Each module has its own README.md with detailed documentation:
+| Module | Description |
+|--------|-------------|
+| [📋 Abstractions](abstractions/README.md) | Base interfaces & contracts |
+| [⚙️ Configurations](configurations/README.md) | Config loaders |
+| [📊 Constants](constants/README.md) | Application constants |
+| [🎮 Controllers](controllers/README.md) | Route handlers |
+| [💉 Dependencies](dependencies/README.md) | DI factories |
+| [📨 DTOs](dtos/README.md) | Data transfer objects |
+| [❌ Errors](errors/README.md) | Custom exceptions |
+| [🛡️ Middlewares](middlewares/README.md) | Request middleware |
+| [🔄 Migrations](migrations/README.md) | Database migrations |
+| [🗄️ Models](models/README.md) | SQLAlchemy models |
+| [📦 Repositories](repositories/README.md) | Data access |
+| [🔧 Services](services/README.md) | Business logic |
+| [🔨 Utilities](utilities/README.md) | Helper functions |
+| [⚡ CLI](fastmvc_cli/README.md) | Command line interface |
 
-- [Abstractions](abstractions/README.md) - Base interfaces
-- [Configurations](configurations/README.md) - Config loaders
-- [Constants](constants/README.md) - Application constants
-- [Controllers](controllers/README.md) - Route handlers
-- [Dependencies](dependencies/README.md) - DI factories
-- [DTOs](dtos/README.md) - Data transfer objects
-- [Errors](errors/README.md) - Custom exceptions
-- [Middlewares](middlewares/README.md) - Request middleware
-- [Migrations](migrations/README.md) - Database migrations
-- [Models](models/README.md) - SQLAlchemy models
-- [Repositories](repositories/README.md) - Data access
-- [Services](services/README.md) - Business logic
-- [Utilities](utilities/README.md) - Helper functions
-- [CLI](fastmvc_cli/README.md) - Command line interface
+---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We love contributions! Here's how to get started:
+
+```bash
+# Clone the repo
+git clone https://github.com/your-username/pyfastmvc.git
+cd pyfastmvc
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Make your changes and submit a PR!
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+---
 
 ## 📄 License
 
@@ -338,4 +498,14 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ using [FastAPI](https://fastapi.tiangolo.com/)
+<div align="center">
+
+### Built with ❤️ using [FastAPI](https://fastapi.tiangolo.com/)
+
+**⭐ Star us on GitHub if this helped you!**
+
+[Report Bug](https://github.com/pyfastmvc/pyfastmvc/issues) •
+[Request Feature](https://github.com/pyfastmvc/pyfastmvc/issues) •
+[Discussions](https://github.com/pyfastmvc/pyfastmvc/discussions)
+
+</div>
