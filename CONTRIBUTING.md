@@ -113,6 +113,18 @@ docs(readme): add CLI usage examples
 test(services): add user registration tests
 ```
 
+## Branch Protection Policy
+
+⚠️ **Direct pushes to `main` are disabled.** All changes must go through a Pull Request.
+
+This ensures:
+- Code review before merging
+- CI tests pass on all changes
+- Changelog and documentation are updated
+- Code quality is maintained
+
+See `.github/BRANCH_PROTECTION.md` for setup instructions.
+
 ## Pull Request Process
 
 1. **Update your fork**:
