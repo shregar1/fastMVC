@@ -1,0 +1,43 @@
+# MANIFEST.in - Specifies additional files to include in FastMVC distribution
+
+# Include documentation
+include README.md
+include LICENSE
+
+# Include configuration files
+include requirements.txt
+include pytest.ini
+include .coveragerc
+include docker-compose.yml
+include Dockerfile
+
+# Include all JSON configuration files
+recursive-include config *.json
+
+# Include all README files in subdirectories
+recursive-include abstractions *.md
+recursive-include configurations *.md
+recursive-include constants *.md
+recursive-include controllers *.md
+recursive-include dependencies *.md
+recursive-include dtos *.md
+recursive-include errors *.md
+recursive-include middlewares *.md
+recursive-include models *.md
+recursive-include repositories *.md
+recursive-include services *.md
+recursive-include tests *.md
+recursive-include utilities *.md
+
+# Exclude compiled and cache files
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
+
+# Exclude test artifacts
+prune htmlcov
+prune .pytest_cache
+prune .coverage
+
