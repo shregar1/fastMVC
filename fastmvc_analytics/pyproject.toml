@@ -1,0 +1,29 @@
+[project]
+name = "fastmvc_analytics"
+version = "0.1.0"
+description = "Analytics and event tracking for FastMVC."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmvc_core",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0"]
+segment = ["analytics-python>=1.0.0"]
+posthog = ["posthog>=3.0.0"]
+mixpanel = ["mixpanel>=4.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_analytics"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

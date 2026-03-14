@@ -1,0 +1,35 @@
+# Publish FastMVC (pyfastmvc) to PyPI when a GitHub release is published.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-pyfastmvc:
+    name: Publish pyfastmvc to PyPI
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Build pyfastmvc
+        working-directory: fast_mvc_main
+        run: uv build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  # Optional: publish other packages (fastmvc_core, fastmvc_db, ...) if you add PyPI projects and trusted publishing for each.
+  # Uncomment and duplicate with working-directory: fastmvc_core, etc., and separate environments if needed.

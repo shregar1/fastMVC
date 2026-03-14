@@ -1,0 +1,28 @@
+[project]
+name = "fastmvc_tenancy"
+version = "0.1.0"
+description = "Multi-tenancy helpers (tenant context, JWT, middleware, DB scope) for FastMVC."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.100.0",
+    "starlette>=0.27.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "pytest-asyncio>=0.21.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_tenancy"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

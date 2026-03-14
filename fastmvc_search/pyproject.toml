@@ -1,0 +1,29 @@
+[project]
+name = "fastmvc_search"
+version = "0.1.0"
+description = "Search backends (Meilisearch, Typesense, OpenSearch) for FastMVC."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmvc_core",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0"]
+meilisearch = ["meilisearch>=0.31.0"]
+typesense = ["typesense>=0.18.0"]
+opensearch = ["opensearch-py>=2.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_search"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

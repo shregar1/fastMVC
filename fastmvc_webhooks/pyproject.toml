@@ -1,0 +1,27 @@
+[project]
+name = "fastmvc_webhooks"
+version = "0.1.0"
+description = "Webhook signing, retries, and outbound delivery for FastMVC (Stripe-style)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.24.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0", "pytest-asyncio>=0.21.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_webhooks"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,29 @@
+[project]
+name = "fastmvc_jobs"
+version = "0.1.0"
+description = "Background jobs (Celery, RQ, Dramatiq) for FastMVC."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmvc_core",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0"]
+celery = ["celery[redis]>=5.3.0"]
+rq = ["rq>=1.0.0"]
+dramatiq = ["dramatiq[redis]>=1.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_jobs"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,30 @@
+[project]
+name = "fastmvc_queues"
+version = "0.1.0"
+description = "Queue backends (RabbitMQ, SQS, Azure Service Bus, NATS) for FastMVC."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmvc_core",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0"]
+rabbitmq = ["pika>=1.3.0"]
+sqs = ["boto3>=1.28.0"]
+service-bus = ["azure-servicebus>=7.0.0"]
+nats = ["nats-py>=2.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_queues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

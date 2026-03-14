@@ -1,0 +1,29 @@
+[project]
+name = "fastmvc_vectors"
+version = "0.1.0"
+description = "Vector stores (Pinecone, Qdrant, Weaviate) for FastMVC."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmvc_core",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0.0", "pytest-cov>=4.0.0"]
+pinecone = ["pinecone-client>=3.0.0"]
+qdrant = ["qdrant-client>=1.0.0"]
+weaviate = ["weaviate-client>=4.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/your-org/fastmvc_vectors"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
